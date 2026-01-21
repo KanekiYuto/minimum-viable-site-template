@@ -1,11 +1,12 @@
 import type { Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import { NextIntlClientProvider } from 'next-intl';
-import { getMessages } from 'next-intl/server';
-import { routing } from '@i18n/routing';
-import { rtlLocales } from '@i18n/config';
+import { NextIntlClientProvider } from "next-intl";
+import { getMessages } from "next-intl/server";
+import { routing } from "@i18n/routing";
+import { rtlLocales } from "@i18n/config";
+import { AppLayoutClient } from "@/components/layout/AppLayoutClient";
+import { ThemeProvider } from "@extensions/theme/core/ThemeProvider";
 import "../globals.css";
-import { AppLayout } from "@/components/layout";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -47,9 +48,9 @@ export default async function LocaleLayout({
     <html lang={locale} dir={dir} className="dark" suppressHydrationWarning translate="no">
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased bg-background text-foreground`}>
         <NextIntlClientProvider locale={locale} messages={messages}>
-          <AppLayout>
-            {children}
-          </AppLayout>
+          <ThemeProvider>
+            <AppLayoutClient>{children}</AppLayoutClient>
+          </ThemeProvider>
         </NextIntlClientProvider>
       </body>
     </html>

@@ -1,4 +1,6 @@
-export const fadeInUp = {
+import type { Variants } from "framer-motion";
+
+export const fadeInUp: Variants = {
   initial: { opacity: 0, y: 16 },
   animate: {
     opacity: 1,
@@ -7,7 +9,7 @@ export const fadeInUp = {
   },
 };
 
-export const staggerContainer = {
+export const staggerContainer: Variants = {
   initial: { opacity: 1 },
   animate: {
     opacity: 1,

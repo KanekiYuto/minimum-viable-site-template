@@ -2,61 +2,40 @@
 
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
-import { siteConfig } from "@/config/site";
-import {
-  Home,
-  LayoutGrid,
-  Image as ImageIcon,
-  Clock,
-  Settings,
-  HelpCircle,
-} from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useLocale } from "next-intl";
-import { useTranslations } from "next-intl";
 import Image from "next/image";
-import { useThemeStore } from "@/store/useThemeStore";
+import { useThemeStore } from "../../theme/store/useThemeStore";
+import type { ComponentType } from "react";
 
-interface NavItem {
-  icon: React.ComponentType<{ className?: string }>;
-  labelKey: string;
+export type NavItem = {
+  icon: ComponentType<{ className?: string }>;
+  label: string;
   href: string;
-}
-
-const navItemsConfig: Omit<NavItem, "labelKey">[] = [
-  { icon: Home, href: "/home" },
-  { icon: LayoutGrid, href: "/apps" },
-  { icon: ImageIcon, href: "/assets" },
-  { icon: Clock, href: "/history" },
-];
-
-const bottomItemsConfig: Omit<NavItem, "labelKey">[] = [
-  { icon: Settings, href: "/settings/profile" },
-  { icon: HelpCircle, href: "/help" },
-];
+};
 
 interface SidebarProps {
   className?: string;
+  brandName: string;
+  logo: {
+    light: string;
+    dark: string;
+  };
+  navItems: NavItem[];
+  bottomItems: NavItem[];
 }
 
-export function Sidebar({ className }: SidebarProps) {
+export function Sidebar({
+  className,
+  brandName,
+  logo,
+  navItems,
+  bottomItems,
+}: SidebarProps) {
   const pathname = usePathname();
   const locale = useLocale();
-  const t = useTranslations("sidebar");
   const { theme } = useThemeStore();
-
-  const navItems: NavItem[] = [
-    { ...navItemsConfig[0], labelKey: t("home") },
-    { ...navItemsConfig[1], labelKey: t("apps") },
-    { ...navItemsConfig[2], labelKey: t("assets") },
-    { ...navItemsConfig[3], labelKey: t("history") },
-  ];
-
-  const bottomItems: NavItem[] = [
-    { ...bottomItemsConfig[0], labelKey: t("settings") },
-    { ...bottomItemsConfig[1], labelKey: t("help") },
-  ];
 
   // 判断是否激活的辅助函数（处理国际化路由）
   const isActiveRoute = (href: string) => {
@@ -85,8 +64,8 @@ export function Sidebar({ className }: SidebarProps) {
       <Link href="/" className="flex h-16 items-center justify-center">
         <div className="relative h-10 w-10 overflow-hidden rounded-lg">
           <Image
-            src={theme === 'light' ? siteConfig.logo.light : siteConfig.logo.dark}
-            alt={`${siteConfig.name} Logo`}
+            src={theme === "light" ? logo.light : logo.dark}
+            alt={`${brandName} Logo`}
             width={40}
             height={40}
             className="object-contain"
@@ -120,7 +99,7 @@ export function Sidebar({ className }: SidebarProps) {
                 <span className={cn(
                   "text-[10px] transition-colors",
                   isActive ? "text-foreground font-medium" : "text-muted-foreground"
-                )}>{item.labelKey}</span>
+                )}>{item.label}</span>
               </Link>
             );
           })}
@@ -150,7 +129,7 @@ export function Sidebar({ className }: SidebarProps) {
                 <span className={cn(
                   "text-[10px] transition-colors",
                   isActive ? "text-foreground font-medium" : "text-muted-foreground"
-                )}>{item.labelKey}</span>
+                )}>{item.label}</span>
               </Link>
             );
           })}

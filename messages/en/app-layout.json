@@ -1,0 +1,9 @@
+{
+  "toggleTheme": "Toggle theme",
+  "sidebar": {
+    "home": "Home",
+    "history": "History",
+    "settings": "Settings",
+    "help": "Help"
+  }
+}

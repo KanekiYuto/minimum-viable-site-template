@@ -1,0 +1,9 @@
+{
+  "toggleTheme": "切换主题",
+  "sidebar": {
+    "home": "首页",
+    "history": "历史",
+    "settings": "设置",
+    "help": "帮助"
+  }
+}

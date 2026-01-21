@@ -16,6 +16,9 @@
 - `defaultLocale`：默认语言
 - `localeNames`：语言显示名
 - `rtlLocales`：RTL 语言列表
+- `localePrefix`：路由前缀策略（always/as-needed/never）
+- `localeDetection`：是否启用语言自动检测
+- `alternateLinks`：是否生成 hreflang alternate links
 
 已移除 `locales.json`/`locales.js`，语言配置仅维护在 `config/extensions.ts`。
 

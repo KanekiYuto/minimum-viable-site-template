@@ -1,66 +1,27 @@
 "use client";
 
 import { motion, AnimatePresence } from "framer-motion";
-import { cn } from "@/lib/utils";
-import {
-  Home,
-  LayoutGrid,
-  Image as ImageIcon,
-  Clock,
-  Settings,
-  HelpCircle,
-  X,
-  ChevronRight,
-} from "lucide-react";
+import { X, ChevronRight } from "lucide-react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { useLocale } from "next-intl";
-import { useTranslations } from "next-intl";
 import { useEffect } from "react";
 import { useUserStore } from "@/store/useUserStore";
 import Image from "next/image";
-
-interface NavItem {
-  icon: React.ComponentType<{ className?: string }>;
-  labelKey: string;
-  href: string;
-  external?: boolean;
-}
-
-const navItemsConfig: Omit<NavItem, "labelKey">[] = [
-  { icon: Home, href: "/" },
-  { icon: LayoutGrid, href: "/apps" },
-  { icon: ImageIcon, href: "/assets" },
-  { icon: Clock, href: "/history" },
-  { icon: Settings, href: "/settings/profile" },
-];
-
-const bottomItemsConfig: Omit<NavItem, "labelKey">[] = [
-  { icon: HelpCircle, href: "/help" },
-];
+import type { NavItem } from "./Sidebar";
 
 interface MobileSidebarProps {
   isOpen: boolean;
   onClose: () => void;
+  navItems: NavItem[];
+  bottomItems: NavItem[];
 }
 
-export function MobileSidebar({ isOpen, onClose }: MobileSidebarProps) {
-  const pathname = usePathname();
-  const locale = useLocale();
-  const t = useTranslations("sidebar");
+export function MobileSidebar({
+  isOpen,
+  onClose,
+  navItems,
+  bottomItems,
+}: MobileSidebarProps) {
   const { user } = useUserStore();
-
-  const navItems: NavItem[] = [
-    { ...navItemsConfig[0], labelKey: t("home") },
-    { ...navItemsConfig[1], labelKey: t("apps") },
-    { ...navItemsConfig[2], labelKey: t("assets") },
-    { ...navItemsConfig[3], labelKey: t("history") },
-    { ...navItemsConfig[4], labelKey: t("settings") },
-  ];
-
-  const bottomItems: NavItem[] = [
-    { ...bottomItemsConfig[0], labelKey: t("help") },
-  ];
 
   // 禁止背景滚动
   useEffect(() => {
@@ -167,7 +128,7 @@ export function MobileSidebar({ isOpen, onClose }: MobileSidebarProps) {
                       >
                         <div className="flex items-center gap-3">
                           <Icon className="h-5 w-5 text-muted-foreground" />
-                          <span className="text-sm text-foreground">{item.labelKey}</span>
+                          <span className="text-sm text-foreground">{item.label}</span>
                         </div>
                         <ChevronRight className="h-5 w-5 text-muted-foreground" />
                       </Link>
@@ -199,7 +160,7 @@ export function MobileSidebar({ isOpen, onClose }: MobileSidebarProps) {
                         className="flex flex-col items-center gap-1 p-2"
                       >
                         <Icon className="h-5 w-5 text-muted-foreground" />
-                        <span className="text-xs text-foreground text-center">{item.labelKey}</span>
+                        <span className="text-xs text-foreground text-center">{item.label}</span>
                       </Link>
                     </motion.div>
                   );
