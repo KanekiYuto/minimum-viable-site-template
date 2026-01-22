@@ -7,10 +7,10 @@ type BetterAuthOptions = Parameters<typeof betterAuth>[0];
 
 export type AuthFactoryOptions = {
   database: BetterAuthOptions["database"];
-  socialProviders: BetterAuthOptions["socialProviders"];
-  emailAndPassword: BetterAuthOptions["emailAndPassword"];
-  session: BetterAuthOptions["session"];
-  plugins: BetterAuthOptions["plugins"];
+  socialProviders?: BetterAuthOptions["socialProviders"];
+  emailAndPassword?: BetterAuthOptions["emailAndPassword"];
+  session?: BetterAuthOptions["session"];
+  plugins?: BetterAuthOptions["plugins"];
 };
 
 export function createAuth(options: AuthFactoryOptions) {

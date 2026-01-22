@@ -22,8 +22,7 @@
       "@/*": ["./src/*"],
       "@i18n/*": ["./extensions/i18n/i18n/*"],
       "@extensions/*": ["./extensions/*"],
-      "@config/*": ["./config/*"],
-      "pg": ["./node_modules/@types/pg/index.d.ts"]
+      "@config/*": ["./config/*"]
     }
   },
   "include": [

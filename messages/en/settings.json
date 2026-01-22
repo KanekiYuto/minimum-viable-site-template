@@ -1,0 +1,136 @@
+{
+  "layout": {
+    "title": "Settings",
+    "closeMenu": "Close menu",
+    "nav": {
+      "myInfo": "My Info",
+      "profile": "Profile",
+      "credits": "Credits",
+      "creditsBalance": "Credits",
+      "usage": "Usage",
+      "billing": "Billing",
+      "subscriptionPlan": "Subscription plan",
+      "billingDetails": "Billing details"
+    }
+  },
+  "profile": {
+    "title": "Profile settings",
+    "description": "Manage your personal information",
+    "openMenu": "Open settings menu",
+    "editProfile": "Edit profile",
+    "sections": {
+      "settings": "Settings"
+    },
+    "billing": {
+      "currentPlan": "Current subscription plan",
+      "upgradePlan": "Upgrade plan"
+    },
+    "editModal": {
+      "title": "Edit Profile",
+      "subtitle": "Update your personal information",
+      "nameLabel": "Name",
+      "namePlaceholder": "Enter your name",
+      "characters": "characters",
+      "cancel": "Cancel",
+      "save": "Save",
+      "saving": "Saving...",
+      "close": "Close"
+    },
+    "notSignedIn": "Not signed in"
+  },
+  "credits": {
+    "title": "Credits Management",
+    "description": "View and manage your credit balance",
+    "openMenu": "Open settings menu",
+    "overview": {
+      "currentBalance": "Current Balance",
+      "availableCredits": "Available Credits",
+      "currentPlan": "Current Plan",
+      "totalConsumed": "Total Consumed",
+      "todayUsage": "Today's Usage",
+      "creditsUsed": "Credits Used"
+    },
+    "details": {
+      "title": "Credit Details",
+      "noCredits": "No credits available",
+      "noMatchingCredits": "No credits match the filter",
+      "active": "Active",
+      "expiringSoon": "Expiring Soon",
+      "expired": "Expired",
+      "filter": {
+        "all": "All",
+        "active": "Active",
+        "expired": "Expired"
+      },
+      "types": {
+        "daily_free": "Daily Free Credits",
+        "monthly_basic": "Basic Monthly Credits",
+        "monthly_pro": "Pro Monthly Credits",
+        "yearly_basic": "Basic Yearly Credits",
+        "yearly_pro": "Pro Yearly Credits",
+        "monthly_plus": "Plus Monthly Credits",
+        "yearly_plus": "Plus Yearly Credits",
+        "credit_pack_mini_30d": "Mini Credit Pack (30 days)",
+        "credit_pack_standard_30d": "Standard Credit Pack (30 days)",
+        "credit_pack_pro_30d": "Pro Credit Pack (30 days)",
+        "credit_pack_max_30d": "Max Credit Pack (30 days)",
+        "credit_pack_mini_365d": "Mini Credit Pack (365 days)",
+        "credit_pack_standard_365d": "Standard Credit Pack (365 days)",
+        "credit_pack_pro_365d": "Pro Credit Pack (365 days)",
+        "credit_pack_max_365d": "Max Credit Pack (365 days)"
+      },
+      "consumed": "Consumed",
+      "remaining": "Remaining"
+    }
+  },
+  "usage": {
+    "title": "Usage Details",
+    "description": "View your credit usage history and consumption details",
+    "openMenu": "Open settings menu",
+    "stats": {
+      "totalConsumed": "Total Consumed",
+      "recordCount": "Records",
+      "avgPerRecord": "Avg Per Use"
+    },
+    "filter": {
+      "all": "All",
+      "consume": "Consume",
+      "refund": "Refund"
+    },
+    "table": {
+      "title": "Usage History",
+      "noRecords": "No usage records yet",
+      "noMatchingRecords": "No records match the filter",
+      "columns": {
+        "time": "Time",
+        "type": "Type",
+        "description": "Description",
+        "amount": "Change",
+        "balance": "Balance"
+      },
+      "types": {
+        "consume": "Consume",
+        "refund": "Refund"
+      }
+    },
+    "pagination": {
+      "pageInfo": "Page {current} / {total}",
+      "previous": "Previous",
+      "next": "Next"
+    }
+  },
+  "billing": {
+    "title": "Subscription Management",
+    "description": "Manage your subscription plan and billing information",
+    "openMenu": "Open settings menu",
+    "currentPlan": "Current Subscription Plan",
+    "upgradePlan": "Upgrade Plan",
+    "billingAmount": "Amount",
+    "paymentPlatform": "Payment Platform",
+    "startDate": "Start Date",
+    "expiryDate": "Expiry Date",
+    "renewalDate": "Next Renewal Date",
+    "manageSubscription": "Manage Subscription",
+    "active": "Active"
+  }
+}

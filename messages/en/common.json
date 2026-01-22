@@ -1,0 +1,24 @@
+{
+  "userMenu": {
+    "points": "Points",
+    "pointsDetails": "View points details",
+    "settings": "Settings",
+    "manageSubscription": "Manage subscription",
+    "logout": "Logout",
+    "terms": "Terms",
+    "privacy": "Privacy",
+    "blog": "Blog"
+  },
+  "plans": {
+    "free": "Free",
+    "basic": "Basic",
+    "plus": "Plus",
+    "pro": "Professional",
+    "monthly_basic": "Basic - Monthly",
+    "yearly_basic": "Basic - Yearly",
+    "monthly_plus": "Plus - Monthly",
+    "yearly_plus": "Plus - Yearly",
+    "monthly_pro": "Professional - Monthly",
+    "yearly_pro": "Professional - Yearly"
+  }
+}

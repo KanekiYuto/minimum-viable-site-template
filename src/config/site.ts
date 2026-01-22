@@ -4,8 +4,8 @@ export const siteConfig = {
   name: "Site",
   fullName: "Site",
   logo: {
-    light: "/logo.png",
-    dark: "/logo.png",
+    light: "/file.svg",
+    dark: "/file.svg",
   },
   url: process.env.NEXT_PUBLIC_SITE_URL,
   locales: extensionsConfig.i18n.locales,
@@ -25,5 +25,8 @@ export const siteConfig = {
   copyright: {
     year: new Date().getFullYear(),
     text: "All rights reserved.",
+  },
+  auth: {
+    defaultRedirectAfterLogin: "/",
   },
 };

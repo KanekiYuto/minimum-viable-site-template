@@ -1,0 +1,136 @@
+{
+  "layout": {
+    "title": "设置",
+    "closeMenu": "关闭菜单",
+    "nav": {
+      "myInfo": "我的信息",
+      "profile": "个人资料",
+      "credits": "积分",
+      "creditsBalance": "积分",
+      "usage": "用量",
+      "billing": "账单",
+      "subscriptionPlan": "订阅计划",
+      "billingDetails": "账单详情"
+    }
+  },
+  "profile": {
+    "title": "个人设置",
+    "description": "管理您的个人信息",
+    "openMenu": "打开设置菜单",
+    "editProfile": "编辑资料",
+    "sections": {
+      "settings": "设置"
+    },
+    "billing": {
+      "currentPlan": "当前订阅计划",
+      "upgradePlan": "升级套餐"
+    },
+    "editModal": {
+      "title": "编辑个人资料",
+      "subtitle": "更新您的个人信息",
+      "nameLabel": "用户名",
+      "namePlaceholder": "输入用户名",
+      "characters": "字符",
+      "cancel": "取消",
+      "save": "保存",
+      "saving": "保存中...",
+      "close": "关闭"
+    },
+    "notSignedIn": "未登录"
+  },
+  "credits": {
+    "title": "积分管理",
+    "description": "查看和管理您的积分余额",
+    "openMenu": "打开设置菜单",
+    "overview": {
+      "currentBalance": "当前积分",
+      "availableCredits": "可用积分",
+      "currentPlan": "当前套餐",
+      "totalConsumed": "总消耗",
+      "todayUsage": "今日消耗",
+      "creditsUsed": "积分已使用"
+    },
+    "details": {
+      "title": "积分详情",
+      "noCredits": "暂无积分记录",
+      "noMatchingCredits": "没有符合条件的积分记录",
+      "active": "有效",
+      "expiringSoon": "即将过期",
+      "expired": "已过期",
+      "filter": {
+        "all": "全部",
+        "active": "有效",
+        "expired": "已过期"
+      },
+      "types": {
+        "daily_free": "每日免费积分",
+        "monthly_basic": "基础版月度积分",
+        "monthly_pro": "专业版月度积分",
+        "yearly_basic": "基础版年度积分",
+        "yearly_pro": "专业版年度积分",
+        "monthly_plus": "进阶版月度积分",
+        "yearly_plus": "进阶版年度积分",
+        "credit_pack_mini_30d": "迷你积分包（30天）",
+        "credit_pack_standard_30d": "标准积分包（30天）",
+        "credit_pack_pro_30d": "专业积分包（30天）",
+        "credit_pack_max_30d": "至尊积分包（30天）",
+        "credit_pack_mini_365d": "迷你积分包（365天）",
+        "credit_pack_standard_365d": "标准积分包（365天）",
+        "credit_pack_pro_365d": "专业积分包（365天）",
+        "credit_pack_max_365d": "至尊积分包（365天）"
+      },
+      "consumed": "已消耗",
+      "remaining": "剩余"
+    }
+  },
+  "usage": {
+    "title": "用量明细",
+    "description": "查看您的积分使用记录和消费明细",
+    "openMenu": "打开设置菜单",
+    "stats": {
+      "totalConsumed": "总消耗",
+      "recordCount": "记录数",
+      "avgPerRecord": "平均每次"
+    },
+    "filter": {
+      "all": "全部",
+      "consume": "消费",
+      "refund": "退款"
+    },
+    "table": {
+      "title": "使用记录",
+      "noRecords": "暂无使用记录",
+      "noMatchingRecords": "没有符合条件的记录",
+      "columns": {
+        "time": "时间",
+        "type": "类型",
+        "description": "说明",
+        "amount": "变动",
+        "balance": "余额"
+      },
+      "types": {
+        "consume": "消费",
+        "refund": "退款"
+      }
+    },
+    "pagination": {
+      "pageInfo": "第 {current} / {total} 页",
+      "previous": "上一页",
+      "next": "下一页"
+    }
+  },
+  "billing": {
+    "title": "订阅管理",
+    "description": "管理您的订阅计划和账单信息",
+    "openMenu": "打开设置菜单",
+    "currentPlan": "当前订阅计划",
+    "upgradePlan": "升级套餐",
+    "billingAmount": "金额",
+    "paymentPlatform": "支付平台",
+    "startDate": "开始日期",
+    "expiryDate": "有效期",
+    "renewalDate": "下一次续费日期",
+    "manageSubscription": "管理订阅",
+    "active": "活跃"
+  }
+}
