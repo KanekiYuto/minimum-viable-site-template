@@ -19,7 +19,7 @@ export function Header({
   isMobileMenuOpen,
   rightActions,
 }: HeaderProps) {
-  const t = useTranslations("header");
+  const t = useTranslations("app-layout");
 
   return (
     <>

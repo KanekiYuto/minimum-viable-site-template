@@ -1,3 +1,5 @@
+import { extensionsConfig } from "@config/extensions";
+
 export const siteConfig = {
   name: "Site",
   fullName: "Site",
@@ -5,15 +7,19 @@ export const siteConfig = {
     light: "/logo.png",
     dark: "/logo.png",
   },
+  url: process.env.NEXT_PUBLIC_SITE_URL,
+  locales: extensionsConfig.i18n.locales,
+  contact: {
+    email: "support@example.com",
+  },
+  legal: {
+    termsLastUpdated: "2025-01-01",
+    privacyLastUpdated: "2025-01-01",
+  },
   social: {
     discord: "#",
   },
   links: {
-    models: [],
-    apps: [],
-    resources: [],
-    community: [],
-    contact: [],
     legal: [],
   },
   copyright: {

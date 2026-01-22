@@ -1,9 +1,22 @@
 {
   "toggleTheme": "切换主题",
+  "signIn": "登录",
+  "openMenu": "打开菜单",
+  "closeMenu": "关闭菜单",
   "sidebar": {
     "home": "首页",
     "history": "历史",
     "settings": "设置",
     "help": "帮助"
+  },
+  "footer": {
+    "sections": {
+      "legal": "法律"
+    },
+    "links": {
+      "privacy": "隐私政策",
+      "terms": "服务条款",
+      "refund": "退款政策"
+    }
   }
 }

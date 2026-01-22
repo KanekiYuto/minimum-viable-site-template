@@ -1,9 +1,22 @@
 {
   "toggleTheme": "Toggle theme",
+  "signIn": "Sign in",
+  "openMenu": "Open menu",
+  "closeMenu": "Close menu",
   "sidebar": {
     "home": "Home",
     "history": "History",
     "settings": "Settings",
     "help": "Help"
+  },
+  "footer": {
+    "sections": {
+      "legal": "Legal"
+    },
+    "links": {
+      "privacy": "Privacy Policy",
+      "terms": "Terms of Service",
+      "refund": "Refund Policy"
+    }
   }
 }
