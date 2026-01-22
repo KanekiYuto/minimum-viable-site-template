@@ -1,7 +1,6 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 import { Menu, X } from "lucide-react";
 import type { ReactNode } from "react";
@@ -19,8 +18,6 @@ export function Header({
   isMobileMenuOpen,
   rightActions,
 }: HeaderProps) {
-  const t = useTranslations("app-layout");
-
   return (
     <>
       <header
@@ -37,7 +34,7 @@ export function Header({
               whileTap={{ scale: 0.95 }}
               onClick={onMenuClick}
               className="flex h-10 w-10 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
-              aria-label={isMobileMenuOpen ? t("closeMenu") : t("openMenu")}
+              aria-label={isMobileMenuOpen ? "Close menu" : "Open menu"}
             >
               {isMobileMenuOpen ? (
                 <X className="h-5 w-5" />

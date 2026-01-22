@@ -2,11 +2,7 @@ import { DocumentLayout } from "@/components/document";
 import { siteConfig } from "@/config/site";
 import { generateAlternates } from "@/lib/metadata";
 import { loadLegalMarkdown } from "@/lib/legal-content";
-
-const metadataInfo = {
-  title: `${siteConfig.name} - Terms of Service`,
-  description: `Read ${siteConfig.name}'s Terms of Service to understand the rules and conditions for using our AI platform`,
-};
+import { getTranslations } from "next-intl/server";
 
 export async function generateMetadata({
   params,
@@ -14,11 +10,16 @@ export async function generateMetadata({
   params: Promise<{ locale: string }>;
 }) {
   const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: "seo" });
 
   return {
-    title: metadataInfo.title,
-    description: metadataInfo.description,
+    title: t("legal.terms.title", { siteName: siteConfig.name }),
+    description: t("legal.terms.description", { siteName: siteConfig.name }),
     alternates: generateAlternates(locale, "/legal/terms"),
+    robots: {
+      index: false,
+      follow: false,
+    },
   };
 }
 

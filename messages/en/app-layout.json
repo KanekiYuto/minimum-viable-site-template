@@ -1,8 +1,7 @@
 {
   "toggleTheme": "Toggle theme",
   "signIn": "Sign in",
-  "openMenu": "Open menu",
-  "closeMenu": "Close menu",
+  "switchLanguage": "Switch language",
   "sidebar": {
     "home": "Home",
     "history": "History",

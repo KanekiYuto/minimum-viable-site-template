@@ -16,7 +16,7 @@ import {
  * 语言切换触发按钮
  */
 export function LanguageSwitcher() {
-  const t = useTranslations("layout");
+  const t = useTranslations("app-layout");
   const locale = useLocale();
   const router = useRouter();
   const pathname = usePathname();

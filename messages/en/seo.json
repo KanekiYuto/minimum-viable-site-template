@@ -1,0 +1,16 @@
+{
+  "legal": {
+    "privacy": {
+      "title": "{siteName} - Privacy Policy",
+      "description": "Learn how {siteName} collects, uses, and protects your personal information"
+    },
+    "refund": {
+      "title": "{siteName} - Refund Policy",
+      "description": "Learn about {siteName}'s refund policy, including subscription refunds, credit refunds, and application process"
+    },
+    "terms": {
+      "title": "{siteName} - Terms of Service",
+      "description": "Read {siteName}'s Terms of Service to understand the rules and conditions for using our AI platform"
+    }
+  }
+}

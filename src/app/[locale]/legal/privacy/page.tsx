@@ -2,11 +2,7 @@ import { DocumentLayout } from "@/components/document";
 import { siteConfig } from "@/config/site";
 import { generateAlternates } from "@/lib/metadata";
 import { loadLegalMarkdown } from "@/lib/legal-content";
-
-const metadataInfo = {
-  title: `${siteConfig.name} - Privacy Policy`,
-  description: `Learn how ${siteConfig.name} collects, uses, and protects your personal information`,
-};
+import { getTranslations } from "next-intl/server";
 
 export async function generateMetadata({
   params,
@@ -14,11 +10,16 @@ export async function generateMetadata({
   params: Promise<{ locale: string }>;
 }) {
   const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: "seo" });
 
   return {
-    title: metadataInfo.title,
-    description: metadataInfo.description,
+    title: t("legal.privacy.title", { siteName: siteConfig.name }),
+    description: t("legal.privacy.description", { siteName: siteConfig.name }),
     alternates: generateAlternates(locale, "/legal/privacy"),
+    robots: {
+      index: false,
+      follow: false,
+    },
   };
 }
 

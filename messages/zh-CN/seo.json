@@ -1,0 +1,16 @@
+{
+  "legal": {
+    "privacy": {
+      "title": "{siteName} - 隐私政策",
+      "description": "了解 {siteName} 如何收集、使用和保护您的个人信息"
+    },
+    "refund": {
+      "title": "{siteName} - 退款政策",
+      "description": "了解 {siteName} 的退款政策，包括订阅退款、积分退款与申请流程"
+    },
+    "terms": {
+      "title": "{siteName} - 服务条款",
+      "description": "阅读 {siteName} 的服务条款，了解使用我们 AI 平台的规则和条件"
+    }
+  }
+}

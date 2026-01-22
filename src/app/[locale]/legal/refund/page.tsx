@@ -2,11 +2,7 @@ import { DocumentLayout } from "@/components/document";
 import { siteConfig } from "@/config/site";
 import { generateAlternates } from "@/lib/metadata";
 import { loadLegalMarkdown } from "@/lib/legal-content";
-
-const metadataInfo = {
-  title: `${siteConfig.name} - Refund Policy`,
-  description: `Learn about ${siteConfig.name}'s refund policy, including subscription refunds, credit refunds, and application process`,
-};
+import { getTranslations } from "next-intl/server";
 
 export async function generateMetadata({
   params,
@@ -14,11 +10,16 @@ export async function generateMetadata({
   params: Promise<{ locale: string }>;
 }) {
   const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: "seo" });
 
   return {
-    title: metadataInfo.title,
-    description: metadataInfo.description,
+    title: t("legal.refund.title", { siteName: siteConfig.name }),
+    description: t("legal.refund.description", { siteName: siteConfig.name }),
     alternates: generateAlternates(locale, "/legal/refund"),
+    robots: {
+      index: false,
+      follow: false,
+    },
   };
 }
 
