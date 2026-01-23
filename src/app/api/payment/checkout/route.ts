@@ -1,6 +1,6 @@
 import { NextRequest } from 'next/server';
 import { DEFAULT_PAYMENT_PROVIDER } from '@/shared/payment/config';
-import { getPaymentProvider } from '@/shared/payment/providers';
+import { getPaymentProvider } from '@extensions/payment/core/providers';
 
 type CheckoutRequest = {
   productId: string;

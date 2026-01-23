@@ -8,7 +8,7 @@ import {
   getPricingTierByProductId,
   getSubscriptionQuota,
 } from '@/shared/payment/config/payment';
-import { getCreemClient } from '@/shared/payment/creem-client';
+import { getCreemClient } from '../creem-client';
 import type { PaymentWebhookAdapter } from './types';
 
 // 初始化 Creem SDK（仅服务端）

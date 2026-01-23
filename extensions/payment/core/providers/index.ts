@@ -1,5 +1,4 @@
-import type { PaymentProvider } from '../config/payment.types';
-import { DEFAULT_PAYMENT_PROVIDER } from '../config/index';
+import type { PaymentProvider } from "../types";
 import { creemProvider } from './creem';
 import type { PaymentProviderAdapter } from './types';
 
@@ -16,5 +15,5 @@ const PROVIDERS: Record<PaymentProvider, PaymentProviderAdapter> = {
 };
 
 export const getPaymentProvider = (
-  provider: PaymentProvider = DEFAULT_PAYMENT_PROVIDER,
+  provider: PaymentProvider,
 ) => PROVIDERS[provider];

@@ -1,13 +1,21 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { useTranslations } from "next-intl";
 
 /**
  * 定价页面标题组件
  */
-export function PricingHeader() {
-  const t = useTranslations("pricing");
+export interface PricingHeaderProps {
+  title: string;
+  description: string;
+  className?: string;
+}
+
+export function PricingHeader({
+  title,
+  description,
+  className = "text-center mb-12",
+}: PricingHeaderProps) {
 
   return (
     <motion.div
@@ -15,13 +23,13 @@ export function PricingHeader() {
       whileInView={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.6 }}
       viewport={{ once: true }}
-      className="text-center mb-12"
+      className={className}
     >
       <h2 className="text-4xl md:text-5xl font-bold text-foreground mb-4">
-        {t("header.title")}
+        {title}
       </h2>
       <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-        {t("header.description")}
+        {description}
       </p>
     </motion.div>
   );

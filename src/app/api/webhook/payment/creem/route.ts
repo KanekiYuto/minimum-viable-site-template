@@ -1,5 +1,5 @@
 import type { NextRequest } from 'next/server';
-import { getPaymentWebhookAdapter } from '@/shared/payment/webhooks';
+import { getPaymentWebhookAdapter } from '@extensions/payment/core/webhooks';
 
 /**
  * Creem 支付 Webhook 处理器

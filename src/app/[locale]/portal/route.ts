@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { eq, and } from "drizzle-orm";
-import { getCreemClient } from "@/shared/payment/creem-client";
+import { getCreemClient } from "@extensions/payment/core/creem-client";
 import { db } from "@/server/db";
 import { subscription } from "@/server/db/schema";
 import { getSessionUserId } from "@/server/auth-utils";
@@ -43,4 +43,3 @@ export async function GET(request: NextRequest) {
 
   return NextResponse.redirect(portal.customerPortalLink);
 }
-

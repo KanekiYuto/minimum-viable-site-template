@@ -1,64 +1,58 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { motion } from "framer-motion";
-import { useTranslations } from "next-intl";
-import { useUserStore } from "@/store/useUserStore";
-import { PricingCard } from "./PricingCard";
-import { createBillingCycles, createPricingPlans } from "./data";
-import type { BillingCycle } from "./types";
-import { CreditPacks } from "@/components/pricing/CreditPacks";
+import type {
+  BillingCycle,
+  BillingCycleConfig,
+  CreditPackPlan,
+  PricingUser,
+  SubscriptionPricingPlan,
+} from "./types";
+import { PricingCard, type PricingCardLabels } from "./PricingCard";
+import { CreditPacks, type CreditPacksLabels } from "./CreditPacks";
+
+export type PricingLabels = {
+  billingCycleSaveLabel: string;
+  guaranteeText: string;
+};
 
 interface PricingProps {
   className?: string;
+  user?: PricingUser;
+  billingCycles: BillingCycleConfig[];
+  subscriptionPlansByCycle: Record<"monthly" | "yearly", SubscriptionPricingPlan[]>;
+  creditPacks: CreditPackPlan[];
+  currentSubscriptionPlanType?: string | null;
+  freePlanHref?: string;
+  labels: PricingLabels;
+  cardLabels: PricingCardLabels;
+  creditPacksLabels: CreditPacksLabels;
 }
 
-export function Pricing({ className = "" }: PricingProps) {
-  const t = useTranslations("pricing");
-  const user = useUserStore((state) => state.user);
-  const isAuthenticated = useUserStore((state) => state.isAuthenticated);
-
+export function Pricing({
+  className = "",
+  user,
+  billingCycles,
+  subscriptionPlansByCycle,
+  creditPacks,
+  currentSubscriptionPlanType,
+  freePlanHref = "/",
+  labels,
+  cardLabels,
+  creditPacksLabels,
+}: PricingProps) {
   const [billingCycle, setBillingCycle] = useState<BillingCycle>("monthly");
-  const [currentSubscriptionPlanType, setCurrentSubscriptionPlanType] =
-    useState<string | null>(null);
-
-  const pricingUser = user ? { ...user, name: user.name ?? undefined } : null;
-
-  useEffect(() => {
-    if (!isAuthenticated || !user) return;
-
-    async function fetchCurrentSubscription() {
-      try {
-        const response = await fetch("/api/subscription/current");
-        const result = await response.json();
-
-        if (result.success && result.data?.planType) {
-          setCurrentSubscriptionPlanType(result.data.planType);
-        } else {
-          setCurrentSubscriptionPlanType(null);
-        }
-      } catch (error) {
-        console.error("Failed to fetch current subscription:", error);
-        setCurrentSubscriptionPlanType(null);
-      }
-    }
-
-    fetchCurrentSubscription();
-  }, [isAuthenticated, user]);
-
-  const billingCycles = useMemo(() => createBillingCycles(t), [t]);
 
   const pricingPlans = useMemo(() => {
-    if (billingCycle === "onetime") return [];
-    return createPricingPlans(t, billingCycle as "monthly" | "yearly");
-  }, [t, billingCycle]);
+    if (billingCycle === "monthly") return subscriptionPlansByCycle.monthly;
+    if (billingCycle === "yearly") return subscriptionPlansByCycle.yearly;
+    return [];
+  }, [billingCycle, subscriptionPlansByCycle]);
 
-  const resolvedSubscriptionPlanType =
-    isAuthenticated && user ? currentSubscriptionPlanType : null;
-
-  const isCurrentPlan = (planId: string): boolean => {
-    if (!resolvedSubscriptionPlanType) return false;
-    return resolvedSubscriptionPlanType === `${billingCycle}_${planId}`;
+  const isCurrentPlan = (planId: string) => {
+    if (!currentSubscriptionPlanType) return false;
+    return currentSubscriptionPlanType === `${billingCycle}_${planId}`;
   };
 
   const currentCycle = billingCycles.find((c) => c.id === billingCycle);
@@ -91,7 +85,7 @@ export function Pricing({ className = "" }: PricingProps) {
               >
                 {cycle.savePercent && (
                   <span className="absolute -top-4 left-1/2 -translate-x-1/2 bg-gradient-to-r from-primary to-primary-hover text-white text-[10px] font-bold px-2.5 py-1 rounded-md whitespace-nowrap uppercase tracking-wide z-20">
-                    {t("billingCycle.save")} {cycle.savePercent}%
+                    {labels.billingCycleSaveLabel} {cycle.savePercent}%
                   </span>
                 )}
 
@@ -118,7 +112,7 @@ export function Pricing({ className = "" }: PricingProps) {
           viewport={{ once: true }}
           className="w-full bg-background-1 p-4 rounded-2xl border border-background-2"
         >
-          <CreditPacks user={pricingUser} />
+          <CreditPacks packs={creditPacks} user={user} labels={creditPacksLabels} />
         </motion.div>
       ) : (
         <motion.div
@@ -136,14 +130,16 @@ export function Pricing({ className = "" }: PricingProps) {
                 billingCycle={billingCycle}
                 savePercent={savePercent}
                 isCurrent={isCurrentPlan(plan.id)}
-                user={pricingUser}
+                user={user}
+                freePlanHref={freePlanHref}
+                labels={cardLabels}
               />
             ))}
           </div>
 
           <div className="text-center">
             <p className="inline-block px-4 py-2 rounded-lg border border-muted-foreground/20 text-muted-foreground text-xs font-medium tracking-wide bg-background">
-              {t("footer.guarantee")}
+              {labels.guaranteeText}
             </p>
           </div>
         </motion.div>

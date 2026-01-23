@@ -1,5 +1,4 @@
-import type { PaymentProvider } from '../config/payment.types';
-import { DEFAULT_PAYMENT_PROVIDER } from '../config';
+import type { PaymentProvider } from "../types";
 import { creemWebhookAdapter } from './creem';
 import type { PaymentWebhookAdapter } from './types';
 
@@ -21,5 +20,5 @@ const WEBHOOK_PROVIDERS: Record<PaymentProvider, PaymentWebhookAdapter> = {
 };
 
 export const getPaymentWebhookAdapter = (
-  provider: PaymentProvider = DEFAULT_PAYMENT_PROVIDER,
+  provider: PaymentProvider,
 ) => WEBHOOK_PROVIDERS[provider];

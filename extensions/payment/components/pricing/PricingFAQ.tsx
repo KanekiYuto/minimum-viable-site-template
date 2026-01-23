@@ -3,14 +3,17 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Plus, Minus } from "lucide-react";
-import { useTranslations } from "next-intl";
-import { FAQItem } from "./faqData";
-import { siteConfig } from "@/config/site";
 
-/**
- * FAQ项组件
- */
-function FAQItemComponent({ item, isOpen, onToggle }: {
+export interface FAQItem {
+  question: string;
+  answer: string;
+}
+
+function FAQItemComponent({
+  item,
+  isOpen,
+  onToggle,
+}: {
   item: FAQItem;
   isOpen: boolean;
   onToggle: () => void;
@@ -54,28 +57,27 @@ function FAQItemComponent({ item, isOpen, onToggle }: {
   );
 }
 
-/**
- * 定价FAQ组件
- */
-export function PricingFAQ() {
-  const t = useTranslations("pricing.faq");
-  const [openIndex, setOpenIndex] = useState<number | null>(2); // 默认展开第3个问题
+interface PricingFAQProps {
+  title: string;
+  items: FAQItem[];
+  defaultOpenIndex?: number | null;
+}
+
+export function PricingFAQ({
+  title,
+  items,
+  defaultOpenIndex = 2,
+}: PricingFAQProps) {
+  const [openIndex, setOpenIndex] = useState<number | null>(defaultOpenIndex);
 
   const handleToggle = (index: number) => {
     setOpenIndex(openIndex === index ? null : index);
   };
 
-  // 从国际化配置中获取FAQ列表
-  const faqItems: FAQItem[] = Array.from({ length: 10 }, (_, i) => ({
-    question: t(`items.${i}.question`, { siteName: siteConfig.name }),
-    answer: t(`items.${i}.answer`, { siteName: siteConfig.name }),
-  }));
-
   return (
     <div className="py-12 sm:py-16">
       <div className="container mx-auto px-4">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-16">
-          {/* 左侧标题 */}
           <motion.div
             initial={{ opacity: 0, x: -20 }}
             whileInView={{ opacity: 1, x: 0 }}
@@ -84,11 +86,10 @@ export function PricingFAQ() {
             className="lg:col-span-4 mb-2 lg:mb-0"
           >
             <h2 className="text-2xl sm:text-3xl lg:text-5xl font-bold text-foreground leading-tight">
-              {t("title")}
+              {title}
             </h2>
           </motion.div>
 
-          {/* 右侧FAQ列表 */}
           <motion.div
             initial={{ opacity: 0, x: 20 }}
             whileInView={{ opacity: 1, x: 0 }}
@@ -97,7 +98,7 @@ export function PricingFAQ() {
             className="lg:col-span-8"
           >
             <div className="space-y-0">
-              {faqItems.map((faq, index) => (
+              {items.map((faq, index) => (
                 <FAQItemComponent
                   key={index}
                   item={faq}
