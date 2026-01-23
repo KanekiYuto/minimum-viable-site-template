@@ -1,0 +1,47 @@
+{
+  "seo": {
+    "title": "Subscription Successful",
+    "description": "Thank you for subscribing! Your account has been successfully upgraded"
+  },
+  "title": "Subscription Successful!",
+  "description": "Thank you for subscribing. Your account has been successfully upgraded and you can now enjoy all premium features.",
+  "creditPackTitle": "Credit Pack Purchased!",
+  "creditPackDescription": "Thank you for your purchase. Your credits have been added to your account.",
+  "loading": "Loading...",
+  "notFound": "Subscription not found",
+  "creditNotFound": "Credit pack not found",
+  "details": {
+    "title": "Subscription Details",
+    "plan": "Plan",
+    "amount": "Amount",
+    "status": "Status",
+    "statusActive": "Active",
+    "statusCompleted": "Completed",
+    "credits": "Credits"
+  },
+  "nextSteps": {
+    "title": "What's Next",
+    "step1": "Visit your dashboard to explore all available features",
+    "step2": "Start using AI generators to create stunning images",
+    "step3": "View your subscription details in the subscription management page",
+    "creditStep1": "Go to your credits page to view your balance",
+    "creditStep2": "Start using AI generators with your new credits",
+    "creditStep3": "Check credit history for usage details"
+  },
+  "actions": {
+    "startUsing": "Start Using Now",
+    "redirecting": "Redirecting...",
+    "viewSubscription": "View Subscription",
+    "viewCredits": "View Credits"
+  },
+  "autoRedirect": "Auto redirecting in {seconds} seconds...",
+  "planTypes": {
+    "monthly_hobby": "Hobby - Monthly",
+    "yearly_hobby": "Hobby - Yearly",
+    "monthly_basic": "Basic - Monthly",
+    "yearly_basic": "Basic - Yearly",
+    "monthly_pro": "Pro - Monthly",
+    "yearly_pro": "Pro - Yearly",
+    "unknown": "Unknown Plan"
+  }
+}

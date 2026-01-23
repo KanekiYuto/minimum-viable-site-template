@@ -1,0 +1,47 @@
+{
+  "actions": {
+    "redirecting": "重定向...",
+    "startUsing": "立即开始使用",
+    "viewSubscription": "查看订阅",
+    "viewCredits": "查看积分"
+  },
+  "autoRedirect": "在 {seconds} 秒内自动重定向...",
+  "description": "感谢您的订阅。您的账户已成功升级，现在可以享受所有高级功能。",
+  "creditPackTitle": "积分包购买成功！",
+  "creditPackDescription": "感谢购买，积分已添加到您的账户。",
+  "details": {
+    "amount": "金额",
+    "plan": "计划",
+    "status": "现状",
+    "statusActive": "活跃",
+    "statusCompleted": "已完成",
+    "credits": "积分",
+    "title": "订阅详情"
+  },
+  "loading": "正在加载...",
+  "nextSteps": {
+    "step1": "访问您的仪表板，了解所有可用功能",
+    "step2": "开始使用AI生成器创建令人惊叹的图像",
+    "step3": "在订阅管理页面查看订阅详情",
+    "creditStep1": "前往积分页面查看余额",
+    "creditStep2": "使用新积分开始体验 AI 生成",
+    "creditStep3": "在积分明细中查看使用记录",
+    "title": "下一步行动"
+  },
+  "notFound": "未找到订阅",
+  "creditNotFound": "未找到积分包",
+  "planTypes": {
+    "monthly_hobby": "爱好 - 每月",
+    "yearly_hobby": "爱好 - 每年",
+    "monthly_basic": "基础 - 每月",
+    "yearly_basic": "基础 - 每年",
+    "monthly_pro": "专业 - 每月",
+    "yearly_pro": "专业 - 每年",
+    "unknown": "未知计划"
+  },
+  "seo": {
+    "description": "感谢您的订阅！您的账户已成功升级",
+    "title": "订阅成功"
+  },
+  "title": "订阅成功！"
+}

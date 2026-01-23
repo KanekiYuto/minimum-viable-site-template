@@ -10,9 +10,11 @@
   },
   "footer": {
     "sections": {
+      "resources": "资源",
       "legal": "法律"
     },
     "links": {
+      "pricing": "定价",
       "privacy": "隐私政策",
       "terms": "服务条款",
       "refund": "退款政策"

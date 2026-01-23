@@ -14,9 +14,13 @@
     "db:studio": "drizzle-kit studio"
   },
   "dependencies": {
+    "@creem_io/nextjs": "^0.4.0",
     "@radix-ui/react-dropdown-menu": "^2.1.16",
+    "@radix-ui/react-slot": "^1.2.4",
+    "@radix-ui/react-tooltip": "^1.2.8",
     "better-auth": "^1.4.7",
     "class-variance-authority": "^0.7.1",
+    "creem_io": "^0.4.0",
     "dotenv": "^17.2.3",
     "drizzle-orm": "^0.45.1",
     "framer-motion": "^12.23.26",

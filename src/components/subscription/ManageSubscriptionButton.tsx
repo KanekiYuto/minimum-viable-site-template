@@ -1,25 +1,26 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { siteConfig } from "@/config/site";
+import { Link } from "@i18n/routing";
 
 interface ManageSubscriptionButtonProps {
   customerId: string;
 }
 
 export function ManageSubscriptionButton({
-  customerId: _customerId,
+  customerId,
 }: ManageSubscriptionButtonProps) {
   const t = useTranslations("settings.billing");
-  const supportEmail = siteConfig.contact?.email;
-  const href = supportEmail ? `mailto:${supportEmail}` : "/help";
+
+  const href = `/portal?customerId=${encodeURIComponent(customerId)}`;
 
   return (
-    <a
+    <Link
       href={href}
-      className="px-4 py-2 bg-background-2 hover:bg-background-3 border border-background-4 text-foreground text-sm font-medium rounded-xl transition-colors cursor-pointer"
+      prefetch={false}
+      className="px-4 py-2 bg-background-2 hover:bg-background-3 border border-background-4 text-foreground text-sm font-medium rounded-xl transition-colors cursor-pointer inline-flex"
     >
       {t("manageSubscription")}
-    </a>
+    </Link>
   );
 }

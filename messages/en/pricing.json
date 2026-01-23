@@ -1,0 +1,159 @@
+{
+  "seo": {
+    "title": "Pricing - Picoo AI Creative Platform",
+    "description": "Flexible pricing plans for everyone. Start free with 100 credits/month or upgrade to unlock unlimited potential. Simple, transparent pricing with no surprises"
+  },
+  "faq": {
+    "title": "Your Questions, Our Answers!",
+    "items": [
+      {
+        "question": "What are credits?",
+        "answer": "Credits are the virtual currency unit of the {siteName} platform, used for various AI generation features. Different features consume different amounts of credits: image generation typically costs 5 credits per image, while video generation varies from 30-50 credits depending on duration and model. The credit system allows you to flexibly use various creative tools."
+      },
+      {
+        "question": "How do I accumulate credits?",
+        "answer": "There are several ways to obtain credits: 1) Subscription plans - automatically receive a fixed credit amount each month with automatic renewal; 2) Purchase credit packages separately - one-time purchase, never expires; 3) Free users receive 100 credits per month. Monthly credits for subscribers don't roll over to the next month, but purchased credit packages are retained permanently."
+      },
+      {
+        "question": "Can I use {siteName} for free?",
+        "answer": "Absolutely! Free users receive 100 credits per month, enough to generate about 20 images. However, free users can only use basic AI models, generated content is publicly visible, and video generation is not supported. To use more powerful models, maintain content privacy, or generate videos, we recommend upgrading to a paid plan."
+      },
+      {
+        "question": "Do I need to purchase a plan to unlock video generation?",
+        "answer": "Yes, video generation is a paid feature. You need to subscribe to the Basic plan ($10/month) or higher to use video generation. Basic plan users can generate about 40 videos per month, with Advanced and Professional plans offering more quota. Video generation includes text-to-video, image-to-video, and other creative modes."
+      },
+      {
+        "question": "What's the difference between buying credits and subscribing?",
+        "answer": "Subscription plans provide monthly fixed credit allowance, more concurrent generations, priority queue, dedicated customer service and other membership benefits, suitable for regular users. Purchasing credit packages gives you credits one-time that never expire but without membership privileges, suitable for occasional use. Generally, if you need to generate more than 50 images per month, subscription is more cost-effective."
+      },
+      {
+        "question": "How do I cancel my subscription?",
+        "answer": "In Account Settings > Subscription Management, click \"Cancel Subscription\". After cancellation, your subscription will automatically stop at the end of the current billing cycle, and you can still use all paid features and remaining credits until then. There are no fees for cancellation, and you can resubscribe at any time."
+      },
+      {
+        "question": "What is the refund policy?",
+        "answer": "We offer an unconditional 3-day money-back guarantee. If you're not satisfied within 3 days of your first subscription, you can request a full refund through customer service. After the refund is processed, subscription credits in your account will be cleared, but previously purchased credit packages are not affected. Renewal subscriptions are not eligible for refunds."
+      },
+      {
+        "question": "How do I downgrade or upgrade?",
+        "answer": "You can change your subscription plan anytime in Account Settings. Upgrades take effect immediately - you'll get the new plan's benefits right away and pay the prorated difference. Downgrades take effect at the end of the current billing cycle, and you can continue using all features of your current plan until then. Changing plans doesn't affect your purchased credit packages."
+      },
+      {
+        "question": "What if generation fails?",
+        "answer": "If an error or failure occurs during generation, the consumed credits will be automatically refunded to your account within minutes. Our system monitors generation status in real-time to ensure you won't lose credits due to system errors. If credits are not refunded promptly, please contact customer service."
+      },
+      {
+        "question": "Commercial Use Policy",
+        "answer": "All paid users (Basic, Advanced, Professional) can use generated content for commercial purposes, including but not limited to: advertising and marketing, product design, social media content, e-commerce materials, corporate promotion, etc. Free users' generated content is limited to personal learning and non-commercial use. You have usage rights to the generated content but must comply with our Terms of Service and AI model usage guidelines."
+      }
+    ]
+  },
+  "payment": {
+    "securePayment": "Secure and Reliable Payment Methods",
+    "noPaymentMethod": "Don't see your preferred payment method?",
+    "contactUs": "Contact Us",
+    "emailSubject": "Payment Method Suggestion"
+  },
+  "header": {
+    "title": "Choose Your Plan",
+    "description": "Flexible pricing plans to meet the needs of individuals and businesses"
+  },
+  "billingCycle": {
+    "monthly": "monthly",
+    "yearly": "yearly",
+    "onetime": "one-time",
+    "save": "SAVE"
+  },
+  "footer": {
+    "guarantee": "All plans include a 3-day money-back guarantee · Cancel anytime"
+  },
+  "card": {
+    "currentPlan": "Current Plan",
+    "loginRequired": "Please Log In",
+    "configuring": "Configuring",
+    "processing": "Processing...",
+    "mostPopular": "MOST POPULAR",
+    "bestValue": "BEST VALUE",
+    "billingCycle": {
+      "monthly": "monthly",
+      "yearly": "yearly",
+      "onetime": "one-time"
+    }
+  },
+  "packs": {
+    "title": "One-time Credit Packs",
+    "hint": "Credits are added instantly and expire by validity period",
+    "cta": "Buy now",
+    "processing": "Processing...",
+    "configuring": "Configuring",
+    "loginRequired": "Please log in",
+    "credits": "{credits} credits",
+    "creditsBreakdown": "{base} + {bonus} credits",
+    "creditsBreakdownWithTotal": "{total} ({base} + {bonus}) credits",
+    "creditsPromo": "Get <tag>{base}</tag> credits, plus <tag>{bonus}</tag> bonus credits",
+    "bonusRate": "Bonus {percent}% credits",
+    "marketing": {
+      "mini": "Get {base} credits, no bonus credits."
+    },
+    "validDays": "Valid for {days} days",
+    "groupTitle": "Credit pack (valid {days} days)"
+  },
+  "plans": {
+    "free": {
+      "name": "Free",
+      "ctaText": "Start for Free",
+      "features": [
+        "[[{credits}]] Credits/month",
+        "Up to [[{images}]] Images/month",
+        "[[Basic]] AI models",
+        "Content visibility: [[Public]]",
+        "[[{concurrent}]] Concurrent image generation",
+        "Community [[Support]]",
+        "Video generation"
+      ]
+    },
+    "basic": {
+      "name": "Basic",
+      "ctaText": "Get Started",
+      "features": [
+        "[[{credits}]] Credits/month",
+        "Up to [[{images}]] Images/month",
+        "Up to [[{videos}]] Videos/month",
+        "[[Most]] AI models",
+        "Content visibility: [[Private]]",
+        "[[{imageConcurrent}]] Concurrent image generations",
+        "[[{videoConcurrent}]] Concurrent video generations",
+        "Official [[{support}]] Customer Support"
+      ]
+    },
+    "plus": {
+      "name": "Plus",
+      "ctaText": "Get Started",
+      "features": [
+        "[[{credits}]] Credits/month",
+        "Up to [[{images}]] Images/month",
+        "Up to [[{videos}]] Videos/month",
+        "[[Most]] AI models",
+        "Content visibility: [[Private]]",
+        "[[{imageConcurrent}]] Concurrent image generations",
+        "[[{videoConcurrent}]] Concurrent video generations",
+        "Official [[{support}]] Customer Support"
+      ]
+    },
+    "pro": {
+      "name": "Professional",
+      "ctaText": "Get Started",
+      "features": [
+        "[[{credits}]] Credits/month",
+        "Up to [[{images}]] Images/month",
+        "Up to [[{videos}]] Videos/month",
+        "[[All]] AI models",
+        "Content visibility: [[Private]]",
+        "[[{imageConcurrent}]] Concurrent image generations",
+        "[[{videoConcurrent}]] Concurrent video generations",
+        "One-on-one [[{support}]] Priority Support",
+        "[[Priority Queue]] processing"
+      ]
+    }
+  }
+}

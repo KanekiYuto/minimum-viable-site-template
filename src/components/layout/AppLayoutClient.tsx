@@ -95,6 +95,10 @@ export function AppLayoutClient({ children }: AppLayoutClientProps) {
         copyright: siteConfig.copyright,
         sections: [
           {
+            title: tAppLayout("footer.sections.resources"),
+            links: [{ label: tAppLayout("footer.links.pricing"), href: "/pricing" }],
+          },
+          {
             title: tAppLayout("footer.sections.legal"), links: [
               { label: tAppLayout("footer.links.privacy"), href: "/legal/privacy" },
               { label: tAppLayout("footer.links.terms"), href: "/legal/terms" },

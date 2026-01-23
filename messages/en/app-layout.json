@@ -10,9 +10,11 @@
   },
   "footer": {
     "sections": {
+      "resources": "Resources",
       "legal": "Legal"
     },
     "links": {
+      "pricing": "Pricing",
       "privacy": "Privacy Policy",
       "terms": "Terms of Service",
       "refund": "Refund Policy"
