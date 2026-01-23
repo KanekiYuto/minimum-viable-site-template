@@ -68,15 +68,15 @@ export function PaymentIcons({ methods, supportEmail, labels }: PaymentIconsProp
               <TooltipTrigger asChild>
                 <div className="w-24 h-[72px] rounded-lg overflow-hidden border border-border cursor-pointer hover:border-border/80 transition-colors">
                   <Image
-                    src={method.image}
-                    alt={method.name}
-                    width={96}
-                    height={72}
-                    className="w-full h-full object-cover"
-                    style={{
-                      transform:
-                        typeof method.scale === "number"
-                          ? `scale(${method.scale})`
+                  src={method.image}
+                  alt={method.name}
+                  width={96}
+                  height={72}
+                  className="w-full h-full object-contain"
+                  style={{
+                    transform:
+                      typeof method.scale === "number"
+                        ? `scale(${method.scale})`
                           : undefined,
                     }}
                     unoptimized

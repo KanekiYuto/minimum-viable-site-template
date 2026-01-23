@@ -4,8 +4,8 @@ export const siteConfig = {
   name: "Site",
   fullName: "Site",
   logo: {
-    light: "/file.svg",
-    dark: "/file.svg",
+    light: "/logo.webp",
+    dark: "/logo.webp",
   },
   url: process.env.NEXT_PUBLIC_SITE_URL,
   locales: extensionsConfig.i18n.locales,
