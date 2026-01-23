@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "pnpm merge:messages && next dev",
     "build": "pnpm merge:messages && next build",
     "start": "next start",
     "lint": "eslint",
@@ -20,6 +20,7 @@
     "dotenv": "^17.2.3",
     "drizzle-orm": "^0.45.1",
     "framer-motion": "^12.23.26",
+    "https-proxy-agent": "^7.0.6",
     "lucide-react": "^0.562.0",
     "next": "16.1.4",
     "next-intl": "^4.7.0",
@@ -30,6 +31,7 @@
     "rehype-prism-plus": "^2.0.1",
     "rehype-slug": "^6.0.0",
     "remark-gfm": "^4.0.1",
+    "undici": "^7.19.0",
     "zustand": "^5.0.10"
   },
   "devDependencies": {
