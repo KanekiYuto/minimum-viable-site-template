@@ -220,7 +220,7 @@ const userRepo = {
   },
 };
 
-// 一次性支付完成：写入交易 & 发放积分
+// --- 事件处理：一次性点数包购买（写入交易 & 发放积分） ---
 async function handleCheckoutCompleted(data: any) {
   const { id, product, metadata, order } = data;
 
@@ -282,7 +282,7 @@ async function handleCheckoutCompleted(data: any) {
   }
 }
 
-// 订阅激活：创建订阅记录并绑定用户
+// --- 事件处理：订阅激活（创建订阅记录并绑定用户） ---
 async function handleSubscriptionActive(data: any) {
   const {
     id,
@@ -339,7 +339,7 @@ async function handleSubscriptionActive(data: any) {
   }
 }
 
-// 订阅支付成功：更新订阅 & 发放周期积分
+// --- 事件处理：订阅支付成功（更新订阅 & 发放周期积分） ---
 async function handleSubscriptionPaid(data: any) {
   console.log('handleSubscriptionPaid', data);
   const payload =
@@ -514,7 +514,7 @@ async function handleRevokeAccess(data: any) {
   }
 }
 
-// Webhook 入口：签名校验 + 事件分发
+// --- Webhook 入口：签名校验 + 事件分发 ---
 export const creemWebhookAdapter: PaymentWebhookAdapter = {
   async handle(request: NextRequest) {
     const signature = request.headers.get('creem-signature');
