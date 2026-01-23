@@ -4,6 +4,9 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Plus, Minus } from "lucide-react";
 
+/**
+ * FAQ 条目（由外部注入；此目录不做国际化/文案拼装）。
+ */
 export interface FAQItem {
   question: string;
   answer: string;
@@ -58,11 +61,17 @@ function FAQItemComponent({
 }
 
 interface PricingFAQProps {
+  /** 标题 */
   title: string;
+  /** FAQ 列表 */
   items: FAQItem[];
+  /** 默认展开项索引；传 null 表示默认全折叠 */
   defaultOpenIndex?: number | null;
 }
 
+/**
+ * FAQ 区域（折叠面板）。
+ */
 export function PricingFAQ({
   title,
   items,

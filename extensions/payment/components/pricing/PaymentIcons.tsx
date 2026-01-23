@@ -10,6 +10,12 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 
+/**
+ * 支付方式图标项（由外部注入）。
+ *
+ * - `image` 通常为 public 下的静态资源路径
+ * - `scale` 用于兼容不同图标的视觉大小
+ */
 export type PaymentIconMethod = {
   id: string;
   name: string;
@@ -17,6 +23,11 @@ export type PaymentIconMethod = {
   scale?: number;
 };
 
+/**
+ * PaymentIcons 组件所需文案（由外部注入）。
+ *
+ * 注意：组件内不做国际化。
+ */
 export type PaymentIconsLabels = {
   securePayment: string;
   noPaymentMethod: string;
@@ -25,11 +36,17 @@ export type PaymentIconsLabels = {
 };
 
 interface PaymentIconsProps {
+  /** 支付方式图标列表 */
   methods: PaymentIconMethod[];
+  /** 支持邮箱（用于 mailto 链接，可选） */
   supportEmail?: string;
+  /** 文案 */
   labels: PaymentIconsLabels;
 }
 
+/**
+ * 支付方式展示（带 tooltip）。
+ */
 export function PaymentIcons({ methods, supportEmail, labels }: PaymentIconsProps) {
   return (
     <motion.div

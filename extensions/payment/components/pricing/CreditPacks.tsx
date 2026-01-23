@@ -4,6 +4,11 @@ import { useMemo, useState, type ReactNode } from "react";
 import { createPaymentCheckout } from "../../core/client";
 import type { CreditPackPlan, PricingUser } from "./types";
 
+/**
+ * CreditPacks 组件所需文案/渲染器（由外部注入）。
+ *
+ * 注意：此目录内不做国际化，`renderCreditsPromo` 用于承接 `t.rich(...)` 这类富文本逻辑。
+ */
 export type CreditPacksLabels = {
   title: string;
   hint: string;
@@ -15,6 +20,11 @@ export type CreditPacksLabels = {
   bonusRate: (percent: number) => string;
   credits: (credits: string) => string;
   miniMarketing: (base: string) => string;
+  /**
+   * “基础 + 赠送”富文本行渲染：
+   * - `base/bonus` 为已格式化后的字符串（如 1k/1w）
+   * - `Tag` 用于渲染强调样式的 inline 标签
+   */
   renderCreditsPromo: (args: {
     base: string;
     bonus: string;
@@ -23,11 +33,19 @@ export type CreditPacksLabels = {
 };
 
 interface CreditPacksProps {
+  /** 点数包列表（外部构造并传入） */
   packs: CreditPackPlan[];
+  /** 当前登录用户（未登录可传 null/undefined） */
   user?: PricingUser;
+  /** 文案/富文本渲染器 */
   labels: CreditPacksLabels;
 }
 
+/**
+ * 点数包列表（一次性购买）。
+ *
+ * 点击购买会调用 `createPaymentCheckout` 获取 checkoutUrl 并跳转。
+ */
 export function CreditPacks({ packs, user, labels }: CreditPacksProps) {
   const [loadingPackId, setLoadingPackId] = useState<string | null>(null);
 

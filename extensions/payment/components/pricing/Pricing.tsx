@@ -12,24 +12,45 @@ import type {
 import { PricingCard, type PricingCardLabels } from "./PricingCard";
 import { CreditPacks, type CreditPacksLabels } from "./CreditPacks";
 
+/**
+ * Pricing 组件所需的通用文案（由外部注入）。
+ *
+ * 注意：`extensions/payment/components/**` 内部不做国际化，
+ * 所有文案/富文本都应由 app 层（如 `src/app/**`）传入。
+ */
 export type PricingLabels = {
   billingCycleSaveLabel: string;
   guaranteeText: string;
 };
 
 interface PricingProps {
+  /** 外层容器 className */
   className?: string;
+  /** 当前登录用户（未登录可传 null/undefined） */
   user?: PricingUser;
+  /** 计费周期选项（切换 tab） */
   billingCycles: BillingCycleConfig[];
+  /** 订阅套餐（按周期分组） */
   subscriptionPlansByCycle: Record<"monthly" | "yearly", SubscriptionPricingPlan[]>;
+  /** 一次性点数包 */
   creditPacks: CreditPackPlan[];
+  /** 当前订阅（用于“当前方案”展示）；形如 `${billingCycle}_${planId}` */
   currentSubscriptionPlanType?: string | null;
+  /** free 方案跳转地址 */
   freePlanHref?: string;
+  /** Pricing 自身使用的文案 */
   labels: PricingLabels;
+  /** PricingCard 使用的文案 */
   cardLabels: PricingCardLabels;
+  /** CreditPacks 使用的文案/富文本渲染器 */
   creditPacksLabels: CreditPacksLabels;
 }
 
+/**
+ * 定价区域（订阅套餐 + 点数包）。
+ *
+ * 组件本身不依赖配置/数据源：套餐数据由外部构造并传入。
+ */
 export function Pricing({
   className = "",
   user,

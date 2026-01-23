@@ -16,7 +16,6 @@ export function PricingHeader({
   description,
   className = "text-center mb-12",
 }: PricingHeaderProps) {
-
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}

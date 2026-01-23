@@ -2,6 +2,11 @@ import type { PaymentProvider } from "../types";
 import { creemWebhookAdapter } from './creem';
 import type { PaymentWebhookAdapter } from './types';
 
+/**
+ * Webhook provider 注册表。
+ *
+ * 用于在统一入口（例如 `/api/webhook/payment/:provider`）里根据 provider 选择正确的处理器。
+ */
 const unsupportedWebhookProvider = (
   provider: PaymentProvider,
 ): PaymentWebhookAdapter => ({

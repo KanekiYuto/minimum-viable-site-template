@@ -11,6 +11,19 @@ import {
 import { getCreemClient } from '../creem-client';
 import type { PaymentWebhookAdapter } from './types';
 
+/**
+ * Creem Webhook 适配器。
+ *
+ * 职责：
+ * - 验证签名（`creem-signature` + webhook secret）
+ * - 解析事件并分发到 handler
+ * - 将支付事件映射为本项目的数据写入（subscription/transaction/credit/user）
+ *
+ * 注意：
+ * - 本目录仅处理逻辑，不存放支付配置/产品数据
+ * - 产品/套餐映射通过 `@/shared/payment/config/payment` 的查询函数完成
+ */
+
 // 初始化 Creem SDK（仅服务端）
 const resolveCreem = () => getCreemClient({ requireWebhookSecret: true });
 

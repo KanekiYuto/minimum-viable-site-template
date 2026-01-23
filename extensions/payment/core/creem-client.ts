@@ -4,6 +4,12 @@ type CreemClientOptions = {
   requireWebhookSecret?: boolean;
 };
 
+/**
+ * 服务端：Creem SDK 工厂。
+ *
+ * - 从环境变量读取凭证
+ * - webhook 场景下可强制要求 `CREEM_WEBHOOK_SECRET` 存在
+ */
 export const getCreemClient = ({ requireWebhookSecret }: CreemClientOptions = {}) => {
   const apiKey = process.env.CREEM_API_KEY;
   if (!apiKey) {
