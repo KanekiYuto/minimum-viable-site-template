@@ -104,12 +104,7 @@
       "ctaText": "Start for Free",
       "features": [
         "[[{credits}]] Credits/month",
-        "Up to [[{images}]] Images/month",
-        "[[Basic]] AI models",
-        "Content visibility: [[Public]]",
-        "[[{concurrent}]] Concurrent image generation",
-        "Community [[Support]]",
-        "Video generation"
+        "Community [[Support]]"
       ]
     },
     "basic": {
@@ -117,12 +112,6 @@
       "ctaText": "Get Started",
       "features": [
         "[[{credits}]] Credits/month",
-        "Up to [[{images}]] Images/month",
-        "Up to [[{videos}]] Videos/month",
-        "[[Most]] AI models",
-        "Content visibility: [[Private]]",
-        "[[{imageConcurrent}]] Concurrent image generations",
-        "[[{videoConcurrent}]] Concurrent video generations",
         "Official [[{support}]] Customer Support"
       ]
     },
@@ -131,12 +120,6 @@
       "ctaText": "Get Started",
       "features": [
         "[[{credits}]] Credits/month",
-        "Up to [[{images}]] Images/month",
-        "Up to [[{videos}]] Videos/month",
-        "[[Most]] AI models",
-        "Content visibility: [[Private]]",
-        "[[{imageConcurrent}]] Concurrent image generations",
-        "[[{videoConcurrent}]] Concurrent video generations",
         "Official [[{support}]] Customer Support"
       ]
     },
@@ -145,12 +128,6 @@
       "ctaText": "Get Started",
       "features": [
         "[[{credits}]] Credits/month",
-        "Up to [[{images}]] Images/month",
-        "Up to [[{videos}]] Videos/month",
-        "[[All]] AI models",
-        "Content visibility: [[Private]]",
-        "[[{imageConcurrent}]] Concurrent image generations",
-        "[[{videoConcurrent}]] Concurrent video generations",
         "One-on-one [[{support}]] Priority Support",
         "[[Priority Queue]] processing"
       ]
