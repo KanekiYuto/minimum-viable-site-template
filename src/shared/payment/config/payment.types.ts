@@ -14,12 +14,19 @@ export type BillingCycle = 'monthly' | 'yearly';
 /**
  * 方案类型（用于站内权限/展示）
  */
-export type PlanType = 'free' | 'basic' | 'plus' | 'pro';
+/**
+ * 套餐类型（站内使用）。
+ *
+ * 数据库字段是 text，因此这里保持开放，便于插件化扩展新增套餐（如 enterprise）。
+ * 内置套餐仍建议使用：free/basic/plus/pro。
+ */
+export type PlanType = string;
 
 export interface CreditPackDefinition {
   id: string;
   name: string;
   price: number;
+  bonusRate?: number;
   credits: number;
   validDays: number;
 }
@@ -43,6 +50,7 @@ export interface PricingPlanMetadata {
   id: PlanType;
   monthlyPrice: number;
   isPopular?: boolean;
+  isSpecialOffer?: boolean;
   outerColor?: string;
   colorClass: string;
 }
@@ -67,4 +75,3 @@ export interface PaymentConfig {
   subscriptions: Record<string, SubscriptionDefinition>;
   providers: Record<PaymentProvider, ProviderProductMap>;
 }
-

@@ -1,30 +1,21 @@
-/**
- * 套餐类型
- */
-export type PlanType = "free" | "basic" | "plus" | "pro";
+import type { PlanType } from "@/shared/payment/config/payment.types";
+import { getPlanUiStyle } from "@/shared/payment/config/payment";
+import { getPlanIdFromSubscriptionPlanType } from "@/shared/payment/config/subscription-key";
 
 /**
- * 将订阅计划类型映射到套餐类型
- * @param subscriptionPlanType 订阅计划类型（如 monthly_basic, yearly_pro 等）
- * @returns 套餐类型
+ * 将订阅计划类型映射为套餐类型。
+ *
+ * 示例：
+ * - `monthly_basic` -> `basic`
+ * - `yearly_pro` -> `pro`
  */
-export function mapSubscriptionPlanType(
-  subscriptionPlanType: string
-): PlanType {
-  if (subscriptionPlanType.includes("pro")) {
-    return "pro";
-  }
-  if (subscriptionPlanType.includes("plus")) {
-    return "plus";
-  }
-  if (subscriptionPlanType.includes("basic")) {
-    return "basic";
-  }
-  return "free";
+export function mapSubscriptionPlanType(subscriptionPlanType: string): PlanType {
+  const planId = getPlanIdFromSubscriptionPlanType(subscriptionPlanType);
+  return planId.length > 0 ? planId : "free";
 }
 
 /**
- * 套餐信息
+ * 套餐信息（用于设置页/Badge 等展示）。
  */
 export interface PlanInfo {
   name: string;
@@ -33,39 +24,16 @@ export interface PlanInfo {
 }
 
 /**
- * 套餐样式配置
- */
-const PLAN_STYLES: Record<PlanType, { colorClass: string; bgClass: string }> = {
-  free: {
-    colorClass: "text-gray-600",
-    bgClass: "bg-gray-100",
-  },
-  basic: {
-    colorClass: "text-green-600",
-    bgClass: "bg-green-50",
-  },
-  plus: {
-    colorClass: "text-blue-600",
-    bgClass: "bg-blue-50",
-  },
-  pro: {
-    colorClass: "text-pink-600",
-    bgClass: "bg-pink-50",
-  },
-};
-
-/**
- * 获取套餐信息
- * @param type 套餐类型
- * @param translateFn 翻译函数
- * @returns 套餐信息（名称和样式）
+ * 获取套餐信息（名称 + 样式）。
+ *
+ * 注意：国际化由调用方传入 `translateFn` 处理，本文件不直接依赖 i18n。
  */
 export function getPlanInfo(
   type: string,
-  translateFn: (key: string) => string
+  translateFn: (key: string) => string,
 ): PlanInfo {
   const planType = (type as PlanType) || "free";
-  const styles = PLAN_STYLES[planType] || PLAN_STYLES.free;
+  const styles = getPlanUiStyle(planType);
 
   return {
     name: translateFn(planType),
@@ -74,14 +42,11 @@ export function getPlanInfo(
 }
 
 /**
- * 获取套餐样式
- * @param type 套餐类型
- * @returns 套餐样式（颜色类和背景类）
+ * 获取套餐样式（兜底为 free）。
  */
 export function getPlanStyles(type: string): {
   colorClass: string;
   bgClass: string;
 } {
-  const planType = (type as PlanType) || "free";
-  return PLAN_STYLES[planType] || PLAN_STYLES.free;
+  return getPlanUiStyle(type);
 }

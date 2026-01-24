@@ -1,3 +1,5 @@
+import { buildSubscriptionPlanType, type SubscriptionBillingCycle } from "@/shared/payment/config/subscription-key";
+
 // 积分配置
 export const creditConfig = {
   // 每日免费积分数量
@@ -8,10 +10,7 @@ export const creditConfig = {
   // 积分类型
   creditTypes: {
     dailyFree: "daily_free",
-    monthlyBasic: "monthly_basic",
-    monthlyPro: "monthly_pro",
-    yearlyBasic: "yearly_basic",
-    yearlyPro: "yearly_pro",
+    quotaPack: "quota_pack",
   },
 
   // 用户类型
@@ -24,6 +23,16 @@ export const creditConfig = {
 } as const;
 
 export type UserType = "free" | "basic" | "plus" | "pro";
+
+/**
+ * 构造订阅积分类型（与 subscriptionPlanType 同格式）
+ */
+export function buildSubscriptionCreditType(
+  billingCycle: SubscriptionBillingCycle,
+  planId: string,
+): string {
+  return buildSubscriptionPlanType(billingCycle, planId);
+}
 
 /**
  * 获取每日免费积分数量

@@ -1,137 +1,99 @@
 /**
  * 支付定价配置（常量 + 工具函数）。
  *
+ * 设计目标：新增套餐尽量只改 `payment-config.source.ts` + i18n 文案，
+ * 其余逻辑（pricing 页/checkout/webhook）自动适配。
+ *
  * 约束：该目录只存放“配置/数据”，不包含运行时支付逻辑（如 webhook、创建 checkout 等）。
  * 运行时逻辑请放在 `extensions/payment/core`。
  */
 
 import { PAYMENT_CONFIG } from './index';
-import type {
-  CreditPack,
-  PlanType,
-  PricingPlanMetadata,
-  PricingTier,
-  SubscriptionDefinition,
-} from './payment.types';
+import type { CreditPack, PricingPlanMetadata, PricingTier, SubscriptionDefinition } from './payment.types';
+import {
+  CREDIT_PACK_ACCENT_COLORS_BY_NAME,
+  PLAN_DISABLED_FEATURE_INDEXES,
+  PLAN_DISPLAY,
+  PLAN_ORDER,
+} from './payment-config.source';
+import { buildSubscriptionPlanType, getPlanIdFromSubscriptionPlanType } from './subscription-key';
 
-/**
- * 方案常量
- */
-export const PRICING_PLANS = {
-  FREE: 'free',
-  BASIC: 'basic',
-  PLUS: 'plus',
-  PRO: 'pro',
-} as const;
+export type PlanUiStyle = { colorClass: string; bgClass: string };
 
-export type PricingPlanId = typeof PRICING_PLANS[keyof typeof PRICING_PLANS];
-
-/**
- * 订阅计划常量（用于配置 key 与 webhook 反查）
- */
-export const SUBSCRIPTION_PLANS = {
-  MONTHLY_BASIC: 'monthly_basic',
-  YEARLY_BASIC: 'yearly_basic',
-  MONTHLY_PLUS: 'monthly_plus',
-  YEARLY_PLUS: 'yearly_plus',
-  MONTHLY_PRO: 'monthly_pro',
-  YEARLY_PRO: 'yearly_pro',
-  FREE: 'free',
-} as const;
-
-const monthlyBasicPrice =
-  PAYMENT_CONFIG.subscriptions[SUBSCRIPTION_PLANS.MONTHLY_BASIC]?.price || 0;
-const monthlyPlusPrice =
-  PAYMENT_CONFIG.subscriptions[SUBSCRIPTION_PLANS.MONTHLY_PLUS]?.price || 0;
-const monthlyProPrice =
-  PAYMENT_CONFIG.subscriptions[SUBSCRIPTION_PLANS.MONTHLY_PRO]?.price || 0;
-const yearlyBasicPrice =
-  PAYMENT_CONFIG.subscriptions[SUBSCRIPTION_PLANS.YEARLY_BASIC]?.price || 0;
-
-/**
- * 月付价格配置（USD）
- */
-export const PLAN_PRICES = {
-  FREE: 0,
-  BASIC: monthlyBasicPrice,
-  PLUS: monthlyPlusPrice,
-  PRO: monthlyProPrice,
-} as const;
-
-/**
- * 年付折扣百分比（基于 basic 按月折算计算）
- */
-export const YEARLY_DISCOUNT_PERCENT =
-  monthlyBasicPrice && yearlyBasicPrice
-    ? Math.round((1 - yearlyBasicPrice / (monthlyBasicPrice * 12)) * 100)
-    : 0;
-
-/**
- * 定价方案元数据（用于 UI 展示）
- */
-export const PRICING_PLANS_METADATA: Record<PlanType, PricingPlanMetadata> = {
-  free: {
-    id: 'free',
-    monthlyPrice: PLAN_PRICES.FREE,
-    colorClass:
-      'bg-[linear-gradient(180deg,rgba(96,125,139,0.03)_0%,rgba(96,125,139,0.30)_100%)]',
-  },
-  basic: {
-    id: 'basic',
-    monthlyPrice: PLAN_PRICES.BASIC,
-    isPopular: true,
-    colorClass:
-      'bg-[linear-gradient(180deg,rgba(0,0,0,0)_0%,rgba(58,134,255,0.30)_100%)]',
-    outerColor: 'bg-[#3A86FF]',
-  },
-  plus: {
-    id: 'plus',
-    monthlyPrice: PLAN_PRICES.PLUS,
-    colorClass:
-      'bg-[linear-gradient(180deg,rgba(251,86,7,0.03)_0%,rgba(251,86,7,0.30)_100%)]',
-  },
-  pro: {
-    id: 'pro',
-    monthlyPrice: PLAN_PRICES.PRO,
-    colorClass:
-      'bg-[linear-gradient(180deg,rgba(255,0,110,0.03)_0%,rgba(255,0,110,0.30)_100%)]',
-    outerColor: 'bg-[#E91E63]',
-  },
+type PlanDisplayEntry = {
+  pricingCard: { colorClass: string; outerColor?: string };
+  badgeStyle: PlanUiStyle;
+  isPopular?: boolean;
+  isSpecialOffer?: boolean;
 };
 
-export const CREDIT_PACK_ACCENT_COLORS_BY_NAME: Record<string, string> = {
-  mini: 'bg-[#9CA3AF]',
-  standard: 'bg-[#3A86FF]',
-  pro: 'bg-[#FB5607]',
-  max: 'bg-[#E91E63]',
-};
+const PLAN_DISPLAY_RECORD = PLAN_DISPLAY as Record<string, PlanDisplayEntry>;
+
+/**
+ * 套餐展示顺序（free 固定在最前）
+ */
+export const PRICING_PLAN_ORDER: readonly string[] = PLAN_ORDER;
+
+/**
+ * 获取套餐样式（用于设置页等轻量展示，兜底为 free）。
+ */
+export function getPlanUiStyle(type?: string | null): PlanUiStyle {
+  const key = type || 'free';
+  return PLAN_DISPLAY_RECORD[key]?.badgeStyle ?? PLAN_DISPLAY_RECORD.free.badgeStyle;
+}
+
+/**
+ * 获取定价页 features 中需要置灰的条目 index（兜底为空数组）。
+ */
+export function getPlanDisabledFeatureIndexes(planId: string): number[] {
+  return PLAN_DISABLED_FEATURE_INDEXES[planId] || [];
+}
+
+/**
+ * 定价方案元数据（用于 pricing UI：颜色/徽章/显示用月价）
+ */
+export const PRICING_PLANS_METADATA: Record<string, PricingPlanMetadata> = Object.fromEntries(
+  PRICING_PLAN_ORDER.map((planId) => {
+    const monthlyKey = buildSubscriptionPlanType('monthly', planId);
+    const monthlyPrice =
+      planId === 'free' ? 0 : PAYMENT_CONFIG.subscriptions[monthlyKey]?.price || 0;
+
+    const meta =
+      PLAN_DISPLAY_RECORD[planId]?.pricingCard ?? PLAN_DISPLAY_RECORD.free.pricingCard;
+    const isPopular = PLAN_DISPLAY_RECORD[planId]?.isPopular;
+    const isSpecialOffer = PLAN_DISPLAY_RECORD[planId]?.isSpecialOffer;
+
+    return [
+      planId,
+      {
+        id: planId,
+        monthlyPrice,
+        colorClass: meta.colorClass,
+        outerColor: meta.outerColor,
+        ...(isPopular ? { isPopular: true } : {}),
+        ...(isSpecialOffer ? { isSpecialOffer: true } : {}),
+      },
+    ];
+  }),
+);
+
+/**
+ * 点数包卡片外框渐变色（按 pack.name 匹配）
+ */
+export { CREDIT_PACK_ACCENT_COLORS_BY_NAME };
 
 /**
  * Creem 产品 ID 映射（订阅）
+ *
+ * key: subscriptionPlanType（如 monthly_basic / yearly_pro）
  */
-export const CREEM_PAY_PRODUCT_IDS: Record<string, string[]> = {
-  [SUBSCRIPTION_PLANS.MONTHLY_BASIC]:
-    PAYMENT_CONFIG.providers.creem.subscriptions[SUBSCRIPTION_PLANS.MONTHLY_BASIC] ||
-    [],
-  [SUBSCRIPTION_PLANS.YEARLY_BASIC]:
-    PAYMENT_CONFIG.providers.creem.subscriptions[SUBSCRIPTION_PLANS.YEARLY_BASIC] ||
-    [],
-  [SUBSCRIPTION_PLANS.MONTHLY_PLUS]:
-    PAYMENT_CONFIG.providers.creem.subscriptions[SUBSCRIPTION_PLANS.MONTHLY_PLUS] ||
-    [],
-  [SUBSCRIPTION_PLANS.YEARLY_PLUS]:
-    PAYMENT_CONFIG.providers.creem.subscriptions[SUBSCRIPTION_PLANS.YEARLY_PLUS] ||
-    [],
-  [SUBSCRIPTION_PLANS.MONTHLY_PRO]:
-    PAYMENT_CONFIG.providers.creem.subscriptions[SUBSCRIPTION_PLANS.MONTHLY_PRO] ||
-    [],
-  [SUBSCRIPTION_PLANS.YEARLY_PRO]:
-    PAYMENT_CONFIG.providers.creem.subscriptions[SUBSCRIPTION_PLANS.YEARLY_PRO] ||
-    [],
-};
+export const CREEM_PAY_PRODUCT_IDS: Record<string, string[]> =
+  PAYMENT_CONFIG.providers.creem.subscriptions;
 
 /**
  * Creem 产品 ID 映射（点数包）
+ *
+ * key: creditPackId（如 mini_30d）
  */
 export const CREEM_PAY_CREDIT_PACK_PRODUCT_IDS: Record<string, string[]> =
   PAYMENT_CONFIG.providers.creem.creditPacks;
@@ -142,24 +104,50 @@ export const CREEM_PAY_CREDIT_PACK_PRODUCT_IDS: Record<string, string[]> =
 export const CREDIT_PACKS: CreditPack[] = PAYMENT_CONFIG.creditPacks;
 
 const SUBSCRIPTION_DEFINITIONS = PAYMENT_CONFIG.subscriptions;
-const CREDIT_PACKS_BY_ID = Object.fromEntries(
-  CREDIT_PACKS.map((pack) => [pack.id, pack]),
-);
+const CREDIT_PACKS_BY_ID = Object.fromEntries(CREDIT_PACKS.map((pack) => [pack.id, pack]));
 
 const IMAGE_COST = 5;
 const VIDEO_COST = 50;
 
-const SUBSCRIPTION_CREDITS_AMOUNT_CONFIG: Record<string, number> =
-  Object.fromEntries(
-    Object.entries(SUBSCRIPTION_DEFINITIONS).map(([planKey, plan]) => [
-      planKey,
-      Math.round(plan.credits),
-    ]),
-  );
+const SUBSCRIPTION_CREDITS_AMOUNT_CONFIG: Record<string, number> = Object.fromEntries(
+  Object.entries(SUBSCRIPTION_DEFINITIONS).map(([planKey, plan]) => [planKey, Math.round(plan.credits)]),
+);
 
 const SUBSCRIPTION_CREDITS_CONFIG = buildSubscriptionCreditsConfig();
 const PRODUCT_ID_TO_PRICING_TIER = buildPricingTierByProductId();
 const PRODUCT_ID_TO_CREDIT_PACK = buildCreditPackByProductId();
+
+/**
+ * 年付折扣百分比（用于 pricing 页顶部 “SAVE xx%”）
+ *
+ * 默认：优先用 basic（月/年）计算；若不存在，则回退为任意第一个同时具备 monthly+yearly 的套餐。
+ */
+export const YEARLY_DISCOUNT_PERCENT = (() => {
+  const preferred = 'basic';
+  const pick = (planId: string) => {
+    const monthly = SUBSCRIPTION_DEFINITIONS[buildSubscriptionPlanType('monthly', planId)]?.price;
+    const yearly = SUBSCRIPTION_DEFINITIONS[buildSubscriptionPlanType('yearly', planId)]?.price;
+    if (typeof monthly === 'number' && typeof yearly === 'number' && monthly > 0 && yearly > 0) {
+      return { monthly, yearly };
+    }
+    return null;
+  };
+
+  const preferredPair = pick(preferred);
+  if (preferredPair) {
+    return Math.round((1 - preferredPair.yearly / (preferredPair.monthly * 12)) * 100);
+  }
+
+  for (const planId of PRICING_PLAN_ORDER) {
+    if (planId === 'free') continue;
+    const pair = pick(planId);
+    if (pair) {
+      return Math.round((1 - pair.yearly / (pair.monthly * 12)) * 100);
+    }
+  }
+
+  return 0;
+})();
 
 /**
  * 从产品 ID 列表中取“最新版本”（通常为最后一个）
@@ -229,15 +217,17 @@ export function getCreemPayProductId(planKey: string): string {
  */
 function buildPricingTierByProductId(): Record<string, PricingTier> {
   const mapping: Record<string, PricingTier> = {};
-  Object.entries(CREEM_PAY_PRODUCT_IDS).forEach(([planKey, productIds]) => {
+
+  Object.entries(CREEM_PAY_PRODUCT_IDS).forEach(([subscriptionPlanType, productIds]) => {
+    const planType = getPlanIdFromSubscriptionPlanType(subscriptionPlanType);
     productIds.filter(Boolean).forEach((productId) => {
-      const [, planType] = planKey.split('_');
       mapping[productId] = {
-        planType: planType as PlanType,
-        subscriptionPlanType: planKey,
+        planType,
+        subscriptionPlanType,
       };
     });
   });
+
   return mapping;
 }
 
@@ -289,4 +279,3 @@ export function getCreditPackByProductId(productId: string): CreditPack | null {
 export function getCreemPayCreditPackProductId(packId: string): string {
   return getLatestProductId(CREEM_PAY_CREDIT_PACK_PRODUCT_IDS[packId]);
 }
-

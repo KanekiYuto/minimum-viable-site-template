@@ -6,8 +6,10 @@ import { useEffect, useMemo, useState } from "react";
 import { useUserStore } from "@/store/useUserStore";
 import { siteConfig } from "@/config/site";
 import { PAYMENT_CONFIG } from "@/shared/payment/config";
+import { buildSubscriptionPlanType } from "@/shared/payment/config/subscription-key";
 import {
   PRICING_PLANS_METADATA,
+  PRICING_PLAN_ORDER,
   YEARLY_DISCOUNT_PERCENT,
   CREDIT_PACKS,
   getSubscriptionCreditsConfig,
@@ -15,6 +17,7 @@ import {
   getCreemPayCreditPackProductId,
   calculateYearlyPrice,
   CREDIT_PACK_ACCENT_COLORS_BY_NAME,
+  getPlanDisabledFeatureIndexes,
 } from "@/shared/payment/config/payment";
 import {
   PaymentIcons,
@@ -31,13 +34,26 @@ import {
   type PricingUser,
 } from "@extensions/payment/components/pricing";
 
+/**
+ * Pricing 页面（Client Component）
+ *
+ * - 负责：从配置构造展示数据 + 组装 i18n 文案，并注入到 `extensions/payment` 组件
+ * - 不负责：支付运行时逻辑（checkout/webhook 等），这些在 `extensions/payment/core`
+ *
+ * 约束：`extensions/payment/components/**` 内不做国际化，这里集中处理 `useTranslations(...)`。
+ */
 export default function PricingPageClient() {
+  // i18n：按子模块拆分，便于给不同组件注入各自所需文案
   const tPricing = useTranslations("pricing");
   const tCard = useTranslations("pricing.card");
   const tPacks = useTranslations("pricing.packs");
   const tPayment = useTranslations("pricing.payment");
   const tFaq = useTranslations("pricing.faq");
+
+  // 用户态：用于 CTA 状态（登录/当前方案）与拉取当前订阅信息
   const { user, isAuthenticated } = useUserStore();
+
+  // 当前订阅方案类型：形如 `${billingCycle}_${planId}`，用于 PricingCard 的“当前方案”展示
   const [currentSubscriptionPlanType, setCurrentSubscriptionPlanType] =
     useState<string | null>(null);
 
@@ -47,6 +63,7 @@ export default function PricingPageClient() {
       return;
     }
 
+    // 登录后查询当前订阅（避免在扩展组件内做数据请求）
     async function fetchCurrentSubscription() {
       try {
         const response = await fetch("/api/subscription/current");
@@ -60,10 +77,12 @@ export default function PricingPageClient() {
     fetchCurrentSubscription();
   }, [isAuthenticated, user]);
 
+  // 注入到 pricing 组件的最小用户信息
   const pricingUser: PricingUser = user
     ? { id: user.id, email: user.email, name: user.name ?? undefined }
     : null;
 
+  // 计费周期切换（订阅：月/年；一次性：点数包）
   const billingCycles = useMemo<BillingCycleConfig[]>(
     () => [
       { id: "monthly", label: tPricing("billingCycle.monthly") },
@@ -73,120 +92,79 @@ export default function PricingPageClient() {
     [tPricing],
   );
 
+  // 从配置构造订阅套餐（含 UI 展示用文案/feature 文本）
   const subscriptionPlansByCycle = useMemo(() => {
     const buildSubscriptionPlans = (
       billingCycle: "monthly" | "yearly",
     ): SubscriptionPricingPlan[] => {
-      const getCreditsConfig = (planId: string) => {
-        const key =
-          billingCycle === "yearly" ? `yearly_${planId}` : `monthly_${planId}`;
-        return getSubscriptionCreditsConfig(key);
-      };
+      const getPlanKey = (planId: string) =>
+        buildSubscriptionPlanType(billingCycle, planId);
 
-      const getProductId = (planId: string) => {
-        const key =
-          billingCycle === "yearly" ? `yearly_${planId}` : `monthly_${planId}`;
-        return getCreemPayProductId(key);
-      };
+      const getProductId = (planId: string) => getCreemPayProductId(getPlanKey(planId));
+
+      const getCreditsConfig = (planId: string) => getSubscriptionCreditsConfig(getPlanKey(planId));
 
       const getYearlyPrice = (planId: string, monthlyPrice: number) => {
-        const yearlyKey = `yearly_${planId}`;
+        const yearlyKey = buildSubscriptionPlanType("yearly", planId);
         const yearlyPrice = PAYMENT_CONFIG.subscriptions[yearlyKey]?.price;
-        return typeof yearlyPrice === "number"
-          ? yearlyPrice
-          : calculateYearlyPrice(monthlyPrice);
+        return typeof yearlyPrice === "number" ? yearlyPrice : calculateYearlyPrice(monthlyPrice);
       };
 
-      return [
-      {
-        id: "free",
-        name: tPricing("plans.free.name"),
-        monthlyPrice: PRICING_PLANS_METADATA.free.monthlyPrice,
-        yearlyPrice: 0,
-        ctaText: tPricing("plans.free.ctaText"),
-        colorClass: PRICING_PLANS_METADATA.free.colorClass,
-        features: [
-          { text: tPricing("plans.free.features.0", { credits: 100 }) },
-          { text: tPricing("plans.free.features.1", { images: 20 }) },
-          { text: tPricing("plans.free.features.2") },
-          { text: tPricing("plans.free.features.3") },
-          { text: tPricing("plans.free.features.4", { concurrent: 1 }) },
-          { text: tPricing("plans.free.features.5") },
-          { text: tPricing("plans.free.features.6"), isNotSupported: true },
-        ],
-      },
-      {
-        id: "basic",
-        name: tPricing("plans.basic.name"),
-        monthlyPrice: PRICING_PLANS_METADATA.basic.monthlyPrice,
-        yearlyPrice: getYearlyPrice("basic", PRICING_PLANS_METADATA.basic.monthlyPrice),
-        ctaText: tPricing("plans.basic.ctaText"),
-        isPopular: PRICING_PLANS_METADATA.basic.isPopular,
-        colorClass: PRICING_PLANS_METADATA.basic.colorClass,
-        outerColor: PRICING_PLANS_METADATA.basic.outerColor,
-        productId: getProductId("basic"),
-        features: (() => {
-          const config = getCreditsConfig("basic");
-          return [
-            { text: tPricing("plans.basic.features.0", { credits: config.credits }) },
-            { text: tPricing("plans.basic.features.1", { images: config.max_images_per_month }) },
-            { text: tPricing("plans.basic.features.2", { videos: config.max_videos_per_month }) },
-            { text: tPricing("plans.basic.features.3") },
-            { text: tPricing("plans.basic.features.4") },
-            { text: tPricing("plans.basic.features.5", { imageConcurrent: config.image_concurrent }) },
-            { text: tPricing("plans.basic.features.6", { videoConcurrent: config.video_concurrent }) },
-            { text: tPricing("plans.basic.features.7", { support: "7×24" }) },
-          ];
-        })(),
-      },
-      {
-        id: "plus",
-        name: tPricing("plans.plus.name"),
-        monthlyPrice: PRICING_PLANS_METADATA.plus.monthlyPrice,
-        yearlyPrice: getYearlyPrice("plus", PRICING_PLANS_METADATA.plus.monthlyPrice),
-        ctaText: tPricing("plans.plus.ctaText"),
-        colorClass: PRICING_PLANS_METADATA.plus.colorClass,
-        productId: getProductId("plus"),
-        features: (() => {
-          const config = getCreditsConfig("plus");
-          return [
-            { text: tPricing("plans.plus.features.0", { credits: config.credits }) },
-            { text: tPricing("plans.plus.features.1", { images: config.max_images_per_month }) },
-            { text: tPricing("plans.plus.features.2", { videos: config.max_videos_per_month }) },
-            { text: tPricing("plans.plus.features.3") },
-            { text: tPricing("plans.plus.features.4") },
-            { text: tPricing("plans.plus.features.5", { imageConcurrent: config.image_concurrent }) },
-            { text: tPricing("plans.plus.features.6", { videoConcurrent: config.video_concurrent }) },
-            { text: tPricing("plans.plus.features.7", { support: "7×24" }) },
-          ];
-        })(),
-      },
-      {
-        id: "pro",
-        name: tPricing("plans.pro.name"),
-        monthlyPrice: PRICING_PLANS_METADATA.pro.monthlyPrice,
-        yearlyPrice: getYearlyPrice("pro", PRICING_PLANS_METADATA.pro.monthlyPrice),
-        ctaText: tPricing("plans.pro.ctaText"),
-        isSpecialOffer: true,
-        colorClass: PRICING_PLANS_METADATA.pro.colorClass,
-        outerColor: PRICING_PLANS_METADATA.pro.outerColor,
-        productId: getProductId("pro"),
-        features: (() => {
-          const config = getCreditsConfig("pro");
-          return [
-            { text: tPricing("plans.pro.features.0", { credits: config.credits }) },
-            { text: tPricing("plans.pro.features.1", { images: config.max_images_per_month }) },
-            { text: tPricing("plans.pro.features.2", { videos: config.max_videos_per_month }) },
-            { text: tPricing("plans.pro.features.3") },
-            { text: tPricing("plans.pro.features.4") },
-            { text: tPricing("plans.pro.features.5", { imageConcurrent: config.image_concurrent }) },
-            { text: tPricing("plans.pro.features.6", { videoConcurrent: config.video_concurrent }) },
-            { text: tPricing("plans.pro.features.7", { support: "7×24" }) },
-            { text: tPricing("plans.pro.features.8") },
-          ];
-        })(),
-      },
-    ];
+      type FeatureValues = Record<string, string | number | Date>;
+
+      const buildFeatures = (planId: string, values: FeatureValues) => {
+        const raw = tPricing.raw(`plans.${planId}.features`) as unknown;
+        const count = Array.isArray(raw) ? raw.length : 0;
+        const disabled = new Set(getPlanDisabledFeatureIndexes(planId));
+
+        return Array.from({ length: count }, (_, i) => ({
+          text: tPricing(`plans.${planId}.features.${i}`, values),
+          ...(disabled.has(i) ? { isNotSupported: true } : {}),
+        }));
+      };
+
+      return PRICING_PLAN_ORDER.map((planId) => {
+        const meta = PRICING_PLANS_METADATA[planId] || PRICING_PLANS_METADATA.free;
+
+        if (planId === "free") {
+          return {
+            id: "free",
+            name: tPricing("plans.free.name"),
+            monthlyPrice: meta.monthlyPrice,
+            yearlyPrice: 0,
+            ctaText: tPricing("plans.free.ctaText"),
+            colorClass: meta.colorClass,
+            features: buildFeatures("free", {
+              credits: 100,
+              images: 20,
+              concurrent: 1,
+            }),
+          };
+        }
+
+        const config = getCreditsConfig(planId);
+
+        return {
+          id: planId,
+          name: tPricing(`plans.${planId}.name`),
+          monthlyPrice: meta.monthlyPrice,
+          yearlyPrice: getYearlyPrice(planId, meta.monthlyPrice),
+          ctaText: tPricing(`plans.${planId}.ctaText`),
+          ...(meta.isPopular ? { isPopular: true } : {}),
+          ...(meta.isSpecialOffer ? { isSpecialOffer: true } : {}),
+          colorClass: meta.colorClass,
+          outerColor: meta.outerColor,
+          productId: getProductId(planId),
+          features: buildFeatures(planId, {
+            credits: config.credits,
+            images: config.max_images_per_month,
+            videos: config.max_videos_per_month,
+            imageConcurrent: config.image_concurrent,
+            videoConcurrent: config.video_concurrent,
+            support: "7×24",
+          }),
+        };
+      });
     };
 
     return {
@@ -195,19 +173,16 @@ export default function PricingPageClient() {
     };
   }, [tPricing]);
 
+  // 从配置构造点数包（一次性购买）
   const creditPacks = useMemo<CreditPackPlan[]>(() => {
     return CREDIT_PACKS.map((pack) => {
-      const maybeBonusRate = (pack as unknown as { bonusRate?: unknown })
-        .bonusRate;
-      const bonusRate = typeof maybeBonusRate === "number" ? maybeBonusRate : undefined;
-
       return {
         id: pack.id,
         name: pack.name,
         price: pack.price,
         credits: pack.credits,
         validDays: pack.validDays,
-        bonusRate,
+        bonusRate: pack.bonusRate,
         productId: getCreemPayCreditPackProductId(pack.id),
         accentColor:
           CREDIT_PACK_ACCENT_COLORS_BY_NAME[pack.name.toLowerCase()] || undefined,
@@ -215,6 +190,7 @@ export default function PricingPageClient() {
     });
   }, []);
 
+  // 支付方式图标：使用 `public/payments/*`（文件名小写、无 pay_ 前缀）
   const paymentIconMethods = useMemo<PaymentIconMethod[]>(
     () => [
       { id: "mastercard", name: "Mastercard", image: "/payments/mastercard.webp" },
@@ -236,11 +212,12 @@ export default function PricingPageClient() {
       { id: "cash_app_pay", name: "Cash App Pay", image: "/payments/cash_app_pay.webp" },
       { id: "eftpos", name: "Eftpos", image: "/payments/eftpos.webp" },
       { id: "revolut_pay", name: "Revolut Pay", image: "/payments/revolut_pay.webp" },
-      // { id: "more", name: "More", image: "/payments/more.webp" },
+      { id: "more", name: "More", image: "/payments/more.webp" },
     ],
     [],
   );
 
+  // 注入到扩展组件的通用文案（避免扩展组件直接依赖 next-intl）
   const pricingLabels = useMemo<PricingLabels>(
     () => ({
       billingCycleSaveLabel: tPricing("billingCycle.save"),
@@ -249,6 +226,7 @@ export default function PricingPageClient() {
     [tPricing],
   );
 
+  // PricingCard 文案
   const pricingCardLabels = useMemo<PricingCardLabels>(
     () => ({
       billingCycle: {
@@ -265,6 +243,7 @@ export default function PricingPageClient() {
     [tCard],
   );
 
+  // CreditPacks 文案 + 富文本渲染器（承接 t.rich）
   const creditPacksLabels = useMemo<CreditPacksLabels>(
     () => ({
       title: tPacks("title"),
@@ -287,6 +266,7 @@ export default function PricingPageClient() {
     [tPacks],
   );
 
+  // PaymentIcons 文案
   const paymentIconsLabels = useMemo<PaymentIconsLabels>(
     () => ({
       securePayment: tPayment("securePayment"),
@@ -297,6 +277,7 @@ export default function PricingPageClient() {
     [tPayment],
   );
 
+  // FAQ 条目在页面层组装（扩展组件只负责渲染）
   const faqItems = useMemo(
     () =>
       Array.from({ length: 10 }, (_, i) => ({

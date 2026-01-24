@@ -4,6 +4,7 @@ import { pathToFileURL } from 'node:url';
 import dotenv from 'dotenv';
 import { createCreem } from 'creem_io';
 import { paymentConfigSource } from '../config/payment-config.source';
+import { parseSubscriptionPlanType } from '../config/subscription-key';
 
 /**
  * 使用方式:
@@ -88,11 +89,9 @@ const BILLING_PERIOD_BY_CYCLE: Record<BillingCycle, 'every-month' | 'every-year'
 };
 
 const resolveBillingCycle = (planKey: string): BillingCycle => {
-  if (planKey.startsWith('yearly_')) {
-    return 'yearly';
-  }
-  if (planKey.startsWith('monthly_')) {
-    return 'monthly';
+  const { billingCycle } = parseSubscriptionPlanType(planKey);
+  if (billingCycle === 'monthly' || billingCycle === 'yearly') {
+    return billingCycle;
   }
   throw new Error(`Invalid billingCycle for subscription: ${planKey}`);
 };
@@ -156,7 +155,7 @@ type CreditPackBase = {
   validDays: number;
 };
 type SubscriptionBase = {
-  planType: 'basic' | 'plus' | 'pro';
+  planType: string;
   billingCycle: 'monthly' | 'yearly';
   price: number;
   credits: number;
@@ -284,10 +283,10 @@ const writeProductsFile = async (
 syncProducts()
   .then((currentIds) => {
     return writeProductsFile(updatedSource, currentIds).then(() => {
-      console.log(`✓ Updated ${PRODUCTS_PATH(env)} with current IDs`);
+      console.log(`[OK] Updated ${PRODUCTS_PATH(env)} with current IDs`);
     });
   })
   .catch((error) => {
-    console.error('✗ Failed to sync Creem products:', error);
+    console.error('[ERR] Failed to sync Creem products:', error);
     process.exit(1);
   });

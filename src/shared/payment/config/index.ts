@@ -71,4 +71,3 @@ export function getProviderConfig(
 ): ProviderProductMap {
   return PAYMENT_CONFIG.providers[provider];
 }
-
