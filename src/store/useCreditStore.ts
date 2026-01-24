@@ -1,7 +1,9 @@
 import { create } from "zustand";
 import { devtools } from "zustand/middleware";
 
-export type LoadState = "idle" | "loading" | "ready" | "error";
+import type { LoadState } from "./types";
+
+export type { LoadState } from "./types";
 
 export interface CreditItem {
   id: string;

@@ -5,4 +5,4 @@ export const auth = createAuth({
   database: authDatabase,
 });
 
-export type Session = typeof auth.$Infer.Session;
+export type { Session } from "@extensions/auth/server/auth";

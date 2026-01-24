@@ -1,8 +1,7 @@
 import { getCreditPackById, getSubscriptionBySku } from "@/shared/payment/catalog/catalog";
 import type { CreditPackDefinition, SubscriptionDefinition } from "@/shared/payment/types";
+import type { CheckoutType } from "@/shared/payment/checkout";
 import { creemProducts } from "./products/creem";
-
-export type CheckoutType = "sub" | "one-time";
 
 type ProductIds = { current?: string; historical?: readonly string[] };
 

@@ -1,5 +1,7 @@
 import { buildSubscriptionPlanType, type SubscriptionBillingCycle } from "@/shared/payment/subscription-key";
 
+export type { UserType } from "@/shared/user/types";
+
 // 积分配置
 export const creditConfig = {
   // 每日免费积分数量
@@ -22,7 +24,7 @@ export const creditConfig = {
   },
 } as const;
 
-export type UserType = "free" | "basic" | "plus" | "pro";
+
 
 /**
  * 构造订阅积分类型（与 subscriptionPlanType 同格式）

@@ -1,7 +1,8 @@
 import { NextRequest } from "next/server";
 import { DEFAULT_PAYMENT_PROVIDER } from "@/shared/payment/provider";
 import { getPaymentRuntimeConfigFromEnv } from "@/server/payment/runtime-config";
-import { resolveCreemProductId, type CheckoutType } from "@/server/payment/providers/creem/mapping";
+import type { CheckoutType } from "@/shared/payment/checkout";
+import { resolveCreemProductId } from "@/server/payment/providers/creem/mapping";
 import { getPaymentProvider } from "@extensions/payment/core/providers";
 
 type CheckoutRequest = {

@@ -10,12 +10,13 @@
  *   - UI 不应直接依赖 `productId`
  */
 
-export type PaymentProvider = "creem" | "stripe" | "paypal";
+import type { SubscriptionBillingCycle } from "./subscription-key";
+
+export type { PaymentProvider } from "@extensions/payment/shared/types";
 
 /**
  * 订阅计费周期（用于订阅 SKU 的前缀）。
  */
-export type BillingCycle = "monthly" | "yearly";
 
 /**
  * 套餐类型（站内权限/展示用）。
@@ -51,7 +52,7 @@ export interface SubscriptionDefinition {
   /** 套餐类型（不含 free） */
   planType: Exclude<PlanType, "free">;
   /** 计费周期 */
-  billingCycle: BillingCycle;
+  billingCycle: SubscriptionBillingCycle;
   /** 价格（以主币单位，通常为 USD） */
   price: number;
   /** 周期内总点数（不是“每月”） */
@@ -64,4 +65,3 @@ export interface SubscriptionDefinition {
     video: number;
   };
 }
-

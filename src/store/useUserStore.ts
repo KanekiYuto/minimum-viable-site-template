@@ -3,8 +3,11 @@
 import { create } from "zustand";
 import { devtools } from "zustand/middleware";
 
-export type UserType = "free" | "basic" | "pro" | "enterprise" | "plus";
-export type LoadState = "idle" | "loading" | "ready" | "error";
+import type { UserType } from "@/shared/user/types";
+import type { LoadState } from "./types";
+
+export type { UserType } from "@/shared/user/types";
+export type { LoadState } from "./types";
 
 export interface User {
   id: string;

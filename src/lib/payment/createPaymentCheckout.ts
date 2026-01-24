@@ -1,4 +1,4 @@
-export type CheckoutType = "sub" | "one-time";
+import type { CheckoutType } from "@/shared/payment/checkout";
 
 export type CreateCheckoutRequest = {
   type: CheckoutType;
@@ -28,4 +28,3 @@ export async function createPaymentCheckout(
 
   return (await response.json()) as CreateCheckoutResponse;
 }
-
