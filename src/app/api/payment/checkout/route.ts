@@ -1,5 +1,6 @@
 import { NextRequest } from 'next/server';
 import { DEFAULT_PAYMENT_PROVIDER } from '@/shared/payment/config';
+import { getPaymentRuntimeConfigFromEnv } from '@/shared/payment/config/payment-runtime';
 import { getPaymentProvider } from '@extensions/payment/core/providers';
 
 type CheckoutRequest = {
@@ -30,7 +31,7 @@ export async function POST(request: NextRequest) {
   const provider = DEFAULT_PAYMENT_PROVIDER;
 
   try {
-    const adapter = getPaymentProvider(provider);
+    const adapter = getPaymentProvider(provider, getPaymentRuntimeConfigFromEnv());
     const { checkoutUrl } = await adapter.createCheckout({
       productId: body.productId,
       successUrl,

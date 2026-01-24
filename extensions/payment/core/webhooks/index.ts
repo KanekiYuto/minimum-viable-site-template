@@ -1,5 +1,6 @@
 import type { PaymentProvider } from "../types";
-import { creemWebhookAdapter } from './creem';
+import type { PaymentRuntimeConfig } from '../runtime-config';
+import { createCreemWebhookAdapter, type CreemWebhookHandlers } from './creem';
 import type { PaymentWebhookAdapter } from './types';
 
 /**
@@ -18,12 +19,22 @@ const unsupportedWebhookProvider = (
   },
 });
 
-const WEBHOOK_PROVIDERS: Record<PaymentProvider, PaymentWebhookAdapter> = {
-  creem: creemWebhookAdapter,
-  stripe: unsupportedWebhookProvider('stripe'),
-  paypal: unsupportedWebhookProvider('paypal'),
+export type PaymentWebhookHandlers = {
+  creem?: CreemWebhookHandlers;
 };
 
 export const getPaymentWebhookAdapter = (
   provider: PaymentProvider,
-) => WEBHOOK_PROVIDERS[provider];
+  runtimeConfig?: PaymentRuntimeConfig,
+  handlers?: PaymentWebhookHandlers,
+): PaymentWebhookAdapter => {
+  if (provider === 'creem') {
+    const creemConfig = runtimeConfig?.creem;
+    const creemHandlers = handlers?.creem;
+    return creemConfig && creemHandlers
+      ? createCreemWebhookAdapter(creemConfig, creemHandlers)
+      : unsupportedWebhookProvider('creem');
+  }
+
+  return unsupportedWebhookProvider(provider);
+};

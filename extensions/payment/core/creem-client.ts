@@ -1,4 +1,5 @@
 import { createCreem } from 'creem_io';
+import type { CreemRuntimeConfig } from './runtime-config';
 
 type CreemClientOptions = {
   requireWebhookSecret?: boolean;
@@ -7,22 +8,23 @@ type CreemClientOptions = {
 /**
  * 服务端：Creem SDK 工厂。
  *
- * - 从环境变量读取凭证
- * - webhook 场景下可强制要求 `CREEM_WEBHOOK_SECRET` 存在
+ * 说明：`extensions/payment` 本身不读取环境变量，凭证由 app 层注入。
  */
-export const getCreemClient = ({ requireWebhookSecret }: CreemClientOptions = {}) => {
-  const apiKey = process.env.CREEM_API_KEY;
-  if (!apiKey) {
-    throw new Error('Missing CREEM_API_KEY');
+export const getCreemClient = (
+  config: CreemRuntimeConfig,
+  { requireWebhookSecret }: CreemClientOptions = {},
+) => {
+  if (!config.apiKey) {
+    throw new Error('Missing Creem apiKey');
   }
 
-  if (requireWebhookSecret && !process.env.CREEM_WEBHOOK_SECRET) {
-    throw new Error('Missing CREEM_WEBHOOK_SECRET');
+  if (requireWebhookSecret && !config.webhookSecret) {
+    throw new Error('Missing Creem webhookSecret');
   }
 
   return createCreem({
-    apiKey,
-    testMode: process.env.NODE_ENV !== 'production',
-    webhookSecret: process.env.CREEM_WEBHOOK_SECRET,
+    apiKey: config.apiKey,
+    testMode: config.testMode,
+    webhookSecret: config.webhookSecret,
   });
 };

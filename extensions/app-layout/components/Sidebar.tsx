@@ -6,7 +6,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useLocale } from "next-intl";
 import Image from "next/image";
-import { useThemeStore } from "../../theme/store/useThemeStore";
+import { useThemeStore } from "@extensions/theme/store/useThemeStore";
 import type { ComponentType } from "react";
 
 export type NavItem = {

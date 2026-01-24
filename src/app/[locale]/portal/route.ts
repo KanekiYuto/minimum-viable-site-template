@@ -4,6 +4,7 @@ import { getCreemClient } from "@extensions/payment/core/creem-client";
 import { db } from "@/server/db";
 import { subscription } from "@/server/db/schema";
 import { getSessionUserId } from "@/server/auth-utils";
+import { getCreemRuntimeConfigFromEnv } from "@/shared/payment/config/payment-runtime";
 
 /**
  * Creem 客户门户路由（服务端生成门户链接并重定向）
@@ -36,7 +37,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
-  const creem = getCreemClient();
+  const creem = getCreemClient(getCreemRuntimeConfigFromEnv());
 
   // creem_io SDK: customers.createPortal -> { customerPortalLink }
   const portal = await creem.customers.createPortal({ customerId });

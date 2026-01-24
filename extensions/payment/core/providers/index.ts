@@ -1,5 +1,6 @@
 import type { PaymentProvider } from "../types";
-import { creemProvider } from './creem';
+import type { PaymentRuntimeConfig } from '../runtime-config';
+import { createCreemProvider } from './creem';
 import type { PaymentProviderAdapter } from './types';
 
 /**
@@ -13,12 +14,14 @@ const unsupportedProvider = (provider: PaymentProvider): PaymentProviderAdapter 
   },
 });
 
-const PROVIDERS: Record<PaymentProvider, PaymentProviderAdapter> = {
-  creem: creemProvider,
-  stripe: unsupportedProvider('stripe'),
-  paypal: unsupportedProvider('paypal'),
-};
-
 export const getPaymentProvider = (
   provider: PaymentProvider,
-) => PROVIDERS[provider];
+  runtimeConfig?: PaymentRuntimeConfig,
+): PaymentProviderAdapter => {
+  if (provider === 'creem') {
+    const creemConfig = runtimeConfig?.creem;
+    return creemConfig ? createCreemProvider(creemConfig) : unsupportedProvider('creem');
+  }
+
+  return unsupportedProvider(provider);
+};

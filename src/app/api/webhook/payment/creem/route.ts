@@ -1,5 +1,7 @@
 import type { NextRequest } from 'next/server';
 import { getPaymentWebhookAdapter } from '@extensions/payment/core/webhooks';
+import { getCreemRuntimeConfigFromEnv } from '@/shared/payment/config/payment-runtime';
+import { createCreemWebhookHandlers } from '@/server/payment/creem-webhook-handlers';
 
 /**
  * Creem 支付 Webhook 处理器
@@ -13,5 +15,9 @@ import { getPaymentWebhookAdapter } from '@extensions/payment/core/webhooks';
  * 3. 使用 referenceId 关联用户ID,在 CreemCheckout 组件中传递
  */
 export async function POST(request: NextRequest) {
-  return getPaymentWebhookAdapter('creem').handle(request);
+  return getPaymentWebhookAdapter('creem', {
+    creem: getCreemRuntimeConfigFromEnv({ requireWebhookSecret: true }),
+  }, {
+    creem: createCreemWebhookHandlers(),
+  }).handle(request);
 }
