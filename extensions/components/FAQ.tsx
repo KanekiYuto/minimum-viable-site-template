@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Plus, Minus } from "lucide-react";
+import { ChevronDown } from "lucide-react";
 
 /**
  * FAQ 条目（由外部注入；此目录不做国际化/文案拼装）。
@@ -25,17 +25,17 @@ function FAQItemComponent({
     <div className="border-b border-border">
       <button
         onClick={onToggle}
-        className="w-full flex items-center justify-between py-4 sm:py-6 text-left group"
+        className="w-full flex items-center justify-between py-4 sm:py-6 text-left group cursor-pointer"
       >
         <span className="text-sm sm:text-base lg:text-lg text-foreground font-medium pr-3 sm:pr-8 group-hover:text-primary transition-colors">
           {item.question}
         </span>
-        <div className="flex-shrink-0 w-6 h-6 sm:w-8 sm:h-8 rounded-full border border-border flex items-center justify-center group-hover:border-primary transition-colors">
-          {isOpen ? (
-            <Minus className="w-3 h-3 sm:w-4 sm:h-4 text-foreground" />
-          ) : (
-            <Plus className="w-3 h-3 sm:w-4 sm:h-4 text-foreground" />
-          )}
+        <div className="flex-shrink-0 bg-background-1 w-6 h-6 sm:w-8 sm:h-8 rounded-full border border-border flex items-center justify-center group-hover:border-primary transition-colors">
+          <ChevronDown
+            className={`w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground group-hover:text-primary transition-transform duration-200 ${
+              isOpen ? "rotate-180 text-primary" : ""
+            }`}
+          />
         </div>
       </button>
 
@@ -60,7 +60,7 @@ function FAQItemComponent({
   );
 }
 
-interface PricingFAQProps {
+interface FAQProps {
   /** 标题 */
   title: string;
   /** FAQ 列表 */
@@ -72,11 +72,7 @@ interface PricingFAQProps {
 /**
  * FAQ 区域（折叠面板）。
  */
-export function PricingFAQ({
-  title,
-  items,
-  defaultOpenIndex = 2,
-}: PricingFAQProps) {
+export function FAQ({ title, items, defaultOpenIndex = 2 }: FAQProps) {
   const [openIndex, setOpenIndex] = useState<number | null>(defaultOpenIndex);
 
   const handleToggle = (index: number) => {

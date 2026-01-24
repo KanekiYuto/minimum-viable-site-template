@@ -7,6 +7,7 @@ import { useUserStore } from "@/store/useUserStore";
 import { siteConfig } from "@/config/site";
 import { PAYMENT_CONFIG } from "@/shared/payment/config";
 import { buildSubscriptionPlanType } from "@/shared/payment/config/subscription-key";
+import { FAQ } from "@extensions/components/FAQ";
 import {
   PRICING_PLANS_METADATA,
   PRICING_PLAN_ORDER,
@@ -22,7 +23,6 @@ import {
 import {
   PaymentIcons,
   Pricing,
-  PricingFAQ,
   type BillingCycleConfig,
   type CreditPackPlan,
   type CreditPacksLabels,
@@ -56,10 +56,11 @@ export default function PricingPageClient() {
   // 当前订阅方案类型：形如 `${billingCycle}_${planId}`，用于 PricingCard 的“当前方案”展示
   const [currentSubscriptionPlanType, setCurrentSubscriptionPlanType] =
     useState<string | null>(null);
+  const effectiveCurrentSubscriptionPlanType =
+    isAuthenticated && user ? currentSubscriptionPlanType : null;
 
   useEffect(() => {
     if (!isAuthenticated || !user) {
-      setCurrentSubscriptionPlanType(null);
       return;
     }
 
@@ -311,7 +312,7 @@ export default function PricingPageClient() {
           billingCycles={billingCycles}
           subscriptionPlansByCycle={subscriptionPlansByCycle}
           creditPacks={creditPacks}
-          currentSubscriptionPlanType={currentSubscriptionPlanType}
+          currentSubscriptionPlanType={effectiveCurrentSubscriptionPlanType}
           labels={pricingLabels}
           cardLabels={pricingCardLabels}
           creditPacksLabels={creditPacksLabels}
@@ -330,7 +331,7 @@ export default function PricingPageClient() {
       </div>
 
       {/* FAQ 部分 */}
-      <PricingFAQ title={tFaq("title")} items={faqItems} />
+      <FAQ title={tFaq("title")} items={faqItems} />
     </div>
   );
 }

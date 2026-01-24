@@ -7,7 +7,6 @@ export type { CreditPacksLabels } from "./CreditPacks";
 export { PaymentIcons } from "./PaymentIcons";
 export type { PaymentIconMethod } from "./PaymentIcons";
 export type { PaymentIconsLabels } from "./PaymentIcons";
-export { PricingFAQ } from "./PricingFAQ";
 export { PricingHeader } from "./PricingHeader";
 
 export type {
