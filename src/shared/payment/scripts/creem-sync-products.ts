@@ -9,13 +9,13 @@ import { parseSubscriptionPlanType } from '../subscription-key';
 /**
  * 使用方式:
  * 1) 本地(默认):
- *    pnpm creem:sync-products
- *    NODE_ENV=development pnpm creem:sync-products
+ *    `pnpm creem:sync-products`
+ *    `NODE_ENV=development pnpm creem:sync-products`
  * 2) 指定环境:
- *    pnpm creem:sync-products --env=local
- *    NODE_ENV=production pnpm creem:sync-products --env=prod
+ *    `pnpm creem:sync-products --env=local`
+ *    `NODE_ENV=production pnpm creem:sync-products --env=prod`
  * 3) 自定义名称前缀:
- *    pnpm creem:sync-products --name-prefix=YourBrand
+ *    `pnpm creem:sync-products --name-prefix=YourBrand`
  *
  * 必需环境变量:
  * - CREEM_API_KEY
@@ -70,7 +70,7 @@ const DEFAULT_CURRENCY = 'USD';
 const DEFAULT_TAX_MODE = 'exclusive' as const;
 // 税务分类固定为 SaaS
 const DEFAULT_TAX_CATEGORY = 'saas' as const;
-// testMode 决定使用 Creem 的测试或正式环境
+// 测试模式（testMode）决定使用 Creem 的测试或正式环境
 const testMode = modeArg ? modeArg !== 'prod' : env !== 'prod';
 // 产品名称前缀（命令行优先，其次环境变量）
 const namePrefix = prefixArg || process.env.CREEM_PRODUCT_NAME_PREFIX || 'Picoo';

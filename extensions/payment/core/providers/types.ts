@@ -1,7 +1,7 @@
 /**
  * 可选的客户信息（会透传给支付提供商）。
  *
- * 各 provider SDK 可能支持更多字段；这里保持最小、通用。
+ * 各支付提供商 SDK 可能支持更多字段；这里保持最小且通用。
  */
 export interface CheckoutCustomer {
   email?: string;
@@ -9,9 +9,9 @@ export interface CheckoutCustomer {
 }
 
 /**
- * provider adapter 统一使用的 checkout 创建参数。
+ * 支付提供商适配器统一使用的 checkout 创建参数。
  *
- * 该层必须保持 provider-agnostic，并且不包含 app 配置/数据。
+ * 该层必须保持与提供商无关，并且不包含应用层配置/数据。
  */
 export interface CreateCheckoutParams {
   productId: string;

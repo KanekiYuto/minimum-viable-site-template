@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { ChevronDown } from "lucide-react";
 
 /**
- * FAQ 条目（由外部注入；此目录不做国际化/文案拼装）。
+ * 常见问题（FAQ）条目（由外部注入；此目录不做国际化/文案拼装）。
  */
 export interface FAQItem {
   question: string;
@@ -70,7 +70,7 @@ interface FAQProps {
 }
 
 /**
- * FAQ 区域（折叠面板）。
+ * 常见问题（FAQ）区域（折叠面板）。
  */
 export function FAQ({ title, items, defaultOpenIndex = 2 }: FAQProps) {
   const [openIndex, setOpenIndex] = useState<number | null>(defaultOpenIndex);

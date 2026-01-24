@@ -12,7 +12,7 @@ if (auth.plugins.oneTap.enabled) {
   plugins.push(
     oneTapClient({
       clientId: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID as string,
-      // One Tap 行为配置（可在 extensions.ts 统一调整）
+      // 一键登录（One Tap）行为配置（可在 extensions.ts 统一调整）
       autoSelect: auth.plugins.oneTap.autoSelect,
       cancelOnTapOutside: auth.plugins.oneTap.cancelOnTapOutside,
       context: auth.plugins.oneTap.context,

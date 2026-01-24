@@ -7,7 +7,7 @@ type AuthLike = {
   };
 };
 
-// 验证认证的 handler 包装器
+// 认证校验的 handler 包装器
 export function withAuth(
   auth: AuthLike,
   handler: (request: NextRequest, context?: any) => Promise<NextResponse>

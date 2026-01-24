@@ -24,7 +24,7 @@ export type PaymentIconMethod = {
 };
 
 /**
- * PaymentIcons 组件所需文案（由外部注入）。
+ * 支付图标（PaymentIcons）组件所需文案（由外部注入）。
  *
  * 注意：组件内不做国际化。
  */

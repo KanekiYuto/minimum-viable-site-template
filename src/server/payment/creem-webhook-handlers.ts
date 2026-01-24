@@ -11,7 +11,7 @@ import * as transactionService from '@/server/db/services/transaction';
 import * as userService from '@/server/db/services/user';
 
 /**
- * Creem webhook handlers（服务端落库/发放积分）。
+ * 回调处理器（Webhook，Creem；服务端落库/发放积分）。
  *
  * 说明：签名校验与事件分发在 `@extensions/payment/core/webhooks/creem`，这里只做项目侧的数据处理。
  */

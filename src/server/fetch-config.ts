@@ -32,7 +32,7 @@ function isTimeoutError(error: unknown): boolean {
 function getUrlString(input: RequestInfo | URL): string | undefined {
   if (typeof input === "string") return input;
   if (input instanceof URL) return input.toString();
-  // Request
+  // 请求对象（Request，例如 new Request(...)）
   return typeof (input as { url?: unknown })?.url === "string"
     ? (input as { url: string }).url
     : undefined;
@@ -64,7 +64,7 @@ async function fetchWithRetry(
     try {
       const mergedSignal =
         init.signal && typeof AbortSignal !== "undefined" && "any" in AbortSignal
-          ? // Node 20+
+          ? // Node 20+ 才支持 AbortSignal.any
             AbortSignal.any([init.signal, controller.signal])
           : init.signal ?? controller.signal;
 
@@ -112,7 +112,7 @@ const UNDICI_CONFIG = {
 } as const;
 
 async function configureUndiciDispatcher(proxy: ProxyConfig): Promise<void> {
-  // undici 是 Next/Node fetch 的底层实现；通过 setGlobalDispatcher 才能让 fetch 走代理
+  // fetch 底层实现（undici）：通过 setGlobalDispatcher 才能让 fetch 走代理
   const undici = await import("undici");
 
   if (!("setGlobalDispatcher" in undici)) return;
@@ -198,7 +198,7 @@ async function main() {
   }
 }
 
-// instrumentation.ts 会 import 该模块；在 Node runtime 启动阶段执行一次
+// 启动阶段会在 instrumentation.ts 中 import 该模块（Node runtime 仅执行一次）
 void main();
 
 export {};

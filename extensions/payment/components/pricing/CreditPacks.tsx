@@ -4,7 +4,7 @@ import { useMemo, useState, type ReactNode } from "react";
 import type { CreditPackPlan, PricingUser } from "./types";
 
 /**
- * CreditPacks 组件所需文案/渲染器（由外部注入）。
+ * 点数包（CreditPacks）组件所需文案/渲染器（由外部注入）。
  *
  * 注意：此目录内不做国际化，`renderCreditsPromo` 用于承接 `t.rich(...)` 这类富文本逻辑。
  */

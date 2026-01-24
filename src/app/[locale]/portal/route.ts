@@ -28,7 +28,7 @@ export async function GET(request: NextRequest) {
 
   const creem = getCreemClient(getCreemRuntimeConfigFromEnv());
 
-  // creem_io SDK: customers.createPortal -> { customerPortalLink }
+  // 使用 creem_io SDK：customers.createPortal -> { customerPortalLink }
   const portal = await creem.customers.createPortal({ customerId });
 
   return NextResponse.redirect(portal.customerPortalLink);

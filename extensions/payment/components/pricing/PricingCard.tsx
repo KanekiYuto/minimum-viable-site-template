@@ -129,7 +129,7 @@ function PriceSection({
 }
 
 /**
- * CTA 按钮组件
+  * 按钮（CTA）组件
  */
 function CTAButton({
   plan,

@@ -13,11 +13,11 @@ import { PricingCard, type PricingCardLabels } from "./PricingCard";
 import { CreditPacks, type CreditPacksLabels } from "./CreditPacks";
 
 /**
- * Pricing 组件所需的通用文案（由外部注入）。
- *
- * 注意：`extensions/payment/components/**` 内部不做国际化，
- * 所有文案/富文本都应由 app 层（如 `src/app/**`）传入。
- */
+  * 定价（Pricing）组件所需的通用文案（由外部注入）。
+  *
+  * 注意：`extensions/payment/components/**` 内部不做国际化，
+  * 所有文案/富文本都应由应用层（如 `src/app/**`）传入。
+  */
 export type PricingLabels = {
   billingCycleSaveLabel: string;
   guaranteeText: string;

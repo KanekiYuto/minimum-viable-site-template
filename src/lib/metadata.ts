@@ -47,7 +47,7 @@ export function generateAlternates(locale: string, path: string = "/") {
     ])
   );
 
-  // x-default 指向不带语言前缀的路径
+  // 默认语言（x-default）指向不带语言前缀的路径
   const defaultUrl = isRootPath ? siteConfig.url || "" : `${siteConfig.url || ""}${normalizedPath}`;
   languages["x-default"] = defaultUrl;
 

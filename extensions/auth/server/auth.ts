@@ -32,7 +32,7 @@ export function createAuth(options: AuthFactoryOptions) {
     };
   }
 
-  // 默认启用 nextCookies，可选开启 One Tap
+  // 默认启用 nextCookies，并按配置可选开启 One Tap
   const plugins: BetterAuthOptions["plugins"] = [nextCookies()];
   if (auth.plugins.oneTap.enabled) {
     plugins.push(oneTap());

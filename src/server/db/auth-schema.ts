@@ -1,6 +1,6 @@
 import { pgTable, text, timestamp } from 'drizzle-orm/pg-core';
 
-// Better Auth 会话表
+// 会话表（Better Auth）
 export const session = pgTable('session', {
   id: text('id').primaryKey(),
   expiresAt: timestamp('expiresAt').notNull(),
@@ -17,7 +17,7 @@ export const session = pgTable('session', {
     }),
 });
 
-// Better Auth OAuth 账户表
+// OAuth 账户表（Better Auth）
 export const account = pgTable('account', {
   id: text('id').primaryKey(),
   accountId: text('accountId').notNull(),
@@ -39,7 +39,7 @@ export const account = pgTable('account', {
   updatedAt: timestamp('updatedAt').notNull().defaultNow(),
 });
 
-// Better Auth 邮箱验证表
+// 邮箱验证表（Better Auth）
 export const verification = pgTable('verification', {
   id: text('id').primaryKey(),
   identifier: text('identifier').notNull(),
