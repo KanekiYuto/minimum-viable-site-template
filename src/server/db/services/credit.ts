@@ -1,12 +1,32 @@
 import { db } from "@/server/db";
 import { credit } from "@/server/db/schema";
-import { and, eq, gt, gte, isNull, or } from "drizzle-orm";
+import { and, eq, gt, gte, isNull, or, sql } from "drizzle-orm";
 
 /**
  * 获取用户全部积分记录
  */
 export async function listUserCredits(userId: string) {
   return db.select().from(credit).where(eq(credit.userId, userId));
+}
+
+/**
+ * 获取用户当前可用积分总数（DB 聚合，避免拉取全量记录）
+ */
+export async function getAvailableCreditTotal(userId: string, now: Date = new Date()) {
+  const [row] = await db
+    .select({
+      total: sql<number>`COALESCE(SUM(${credit.amount} - ${credit.consumed}), 0)`,
+    })
+    .from(credit)
+    .where(
+      and(
+        eq(credit.userId, userId),
+        gt(credit.amount, credit.consumed),
+        or(isNull(credit.expiresAt), gte(credit.expiresAt, now)),
+      ),
+    );
+
+  return Number(row?.total ?? 0);
 }
 
 /**
