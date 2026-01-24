@@ -1,7 +1,5 @@
-import { db } from "@/server/db";
-import { credit } from "@/server/db/schema";
-import { eq, and, gte } from "drizzle-orm";
 import { creditConfig, getDailyFreeCredit, type UserType } from "./config";
+import { grantCredits, hasCreditIssuedSince } from "@/server/db/services/credit";
 
 /**
  * 检查并下发每日免费积分
@@ -32,31 +30,25 @@ export async function checkAndIssueDailyCredit(
       )
     );
 
-    const existingCredit = await db
-      .select()
-      .from(credit)
-      .where(
-        and(
-          eq(credit.userId, userId),
-          eq(credit.type, creditConfig.creditTypes.dailyFree),
-          gte(credit.issuedAt, todayStart)
-        )
-      )
-      .limit(1);
+    const hasIssued = await hasCreditIssuedSince(
+      userId,
+      creditConfig.creditTypes.dailyFree,
+      todayStart
+    );
 
-    if (existingCredit.length > 0) {
+    if (hasIssued) {
       return false;
     }
 
     const creditAmount = getDailyFreeCredit();
 
-    await db.insert(credit).values({
+    await grantCredits({
       userId,
+      transactionId: null,
       type: creditConfig.creditTypes.dailyFree,
       amount: creditAmount,
-      consumed: 0,
-      issuedAt: new Date(),
       expiresAt: todayEnd,
+      issuedAt: new Date(),
     });
 
     return true;

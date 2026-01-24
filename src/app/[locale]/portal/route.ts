@@ -1,10 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import { eq, and } from "drizzle-orm";
 import { getCreemClient } from "@extensions/payment/core/creem-client";
-import { db } from "@/server/db";
-import { subscription } from "@/server/db/schema";
 import { getSessionUserId } from "@/server/auth-utils";
 import { getCreemRuntimeConfigFromEnv } from "@/shared/payment/config/payment-runtime";
+import { findOwnedSubscriptionByUserAndCustomerId } from "@/server/db/services/subscription";
 
 /**
  * Creem 客户门户路由（服务端生成门户链接并重定向）
@@ -22,16 +20,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: "Missing customerId" }, { status: 400 });
   }
 
-  const [ownedSubscription] = await db
-    .select({ id: subscription.id })
-    .from(subscription)
-    .where(
-      and(
-        eq(subscription.userId, userId),
-        eq(subscription.paymentCustomerId, customerId)
-      )
-    )
-    .limit(1);
+  const ownedSubscription = await findOwnedSubscriptionByUserAndCustomerId(userId, customerId);
 
   if (!ownedSubscription) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });

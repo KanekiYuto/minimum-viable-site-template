@@ -1,8 +1,6 @@
 import { NextResponse, NextRequest } from "next/server";
-import { db } from "@/server/db";
-import { user } from "@/server/db/schema";
-import { eq } from "drizzle-orm";
 import { getSessionUserId } from "@/server/auth-utils";
+import { getUserById } from "@/server/db/services/user";
 
 export async function GET(request: NextRequest) {
   try {
@@ -11,11 +9,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const [userData] = await db
-      .select()
-      .from(user)
-      .where(eq(user.id, userId!))
-      .limit(1);
+    const userData = await getUserById(userId);
 
     if (!userData) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });

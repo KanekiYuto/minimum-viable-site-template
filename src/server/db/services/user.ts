@@ -58,3 +58,33 @@ export async function updateUser(
 
   return updatedUser || null;
 }
+
+/**
+ * 更新用户当前订阅 ID
+ */
+export async function updateUserCurrentSubscription(userId: string, subscriptionId: string) {
+  return db
+    .update(user)
+    .set({ currentSubscriptionId: subscriptionId, updatedAt: new Date() })
+    .where(eq(user.id, userId));
+}
+
+/**
+ * 更新用户方案（一般用于订阅激活/续费）
+ */
+export async function updateUserPlan(userId: string, planType: string, subscriptionId: string) {
+  return db
+    .update(user)
+    .set({ type: planType, currentSubscriptionId: subscriptionId, updatedAt: new Date() })
+    .where(eq(user.id, userId));
+}
+
+/**
+ * 撤销订阅访问权限：降级为 free，并清空 currentSubscriptionId
+ */
+export async function revokeUserAccess(userId: string) {
+  return db
+    .update(user)
+    .set({ type: "free", currentSubscriptionId: null, updatedAt: new Date() })
+    .where(eq(user.id, userId));
+}

@@ -1,13 +1,14 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { and, eq } from 'drizzle-orm';
-import { db } from '@/server/db';
-import { credit, subscription, transaction, user } from '@/server/db/schema';
 import {
   getCreditPackByProductId,
   getPricingTierByProductId,
   getSubscriptionQuota,
 } from '@/shared/payment/config/payment';
 import type { CreemWebhookHandlers } from '@extensions/payment/core/webhooks/creem';
+import * as creditService from '@/server/db/services/credit';
+import * as subscriptionService from '@/server/db/services/subscription';
+import * as transactionService from '@/server/db/services/transaction';
+import * as userService from '@/server/db/services/user';
 
 /**
  * Creem webhook handlers（服务端落库/发放积分）。
@@ -42,170 +43,13 @@ const updateSubscriptionStatus = async (
   }
 
   try {
-    await subscriptionRepo.updateByPaymentId(id, updatePayload);
+    await subscriptionService.updateSubscriptionByPaymentId(id, updatePayload);
 
     console.log(`[OK] Subscription ${status}: ${id}`);
   } catch (error) {
     console.error(`[ERR] Subscription ${status} handler error:`, error);
     throw error;
   }
-};
-
-// 数据访问层：订阅
-const subscriptionRepo = {
-  async updateByPaymentId(paymentSubscriptionId: string, payload: Record<string, unknown>) {
-    return db
-      .update(subscription)
-      .set(payload)
-      .where(eq(subscription.paymentSubscriptionId, paymentSubscriptionId));
-  },
-  async findByPaymentId(paymentSubscriptionId: string) {
-    const [record] = await db
-      .select()
-      .from(subscription)
-      .where(eq(subscription.paymentSubscriptionId, paymentSubscriptionId))
-      .limit(1);
-    return record;
-  },
-  async create(payload: {
-    userId: string;
-    paymentSubscriptionId: string;
-    paymentCustomerId: string;
-    productId: string;
-    planType: string;
-    amount: number;
-    currency: string;
-    expiresAt: Date | null;
-    nextBillingAt: Date | null;
-  }) {
-    return db
-      .insert(subscription)
-      .values({
-        userId: payload.userId,
-        paymentPlatform: 'creem',
-        paymentSubscriptionId: payload.paymentSubscriptionId,
-        paymentCustomerId: payload.paymentCustomerId,
-        productId: payload.productId,
-        planType: payload.planType,
-        status: 'active',
-        amount: payload.amount,
-        currency: payload.currency,
-        startedAt: new Date(),
-        expiresAt: payload.expiresAt,
-        nextBillingAt: payload.nextBillingAt,
-      })
-      .returning();
-  },
-  async findActiveByUserId(userId: string) {
-    const [active] = await db
-      .select()
-      .from(subscription)
-      .where(and(eq(subscription.userId, userId), eq(subscription.status, 'active')))
-      .limit(1);
-    return active;
-  },
-  async updateById(subscriptionId: string, payload: Record<string, unknown>) {
-    return db.update(subscription).set(payload).where(eq(subscription.id, subscriptionId));
-  },
-};
-
-// 数据访问层：交易
-const transactionRepo = {
-  async findByPaymentTransactionId(paymentTransactionId: string) {
-    const [existing] = await db
-      .select()
-      .from(transaction)
-      .where(eq(transaction.paymentTransactionId, paymentTransactionId))
-      .limit(1);
-    return existing;
-  },
-  async createOneTimePayment(payload: {
-    userId: string;
-    paymentTransactionId: string;
-    productId: string;
-    amount: number;
-    currency: string;
-  }) {
-    const [record] = await db
-      .insert(transaction)
-      .values({
-        userId: payload.userId,
-        paymentPlatform: 'creem',
-        paymentTransactionId: payload.paymentTransactionId,
-        productId: payload.productId,
-        type: 'one_time_payment',
-        amount: payload.amount,
-        currency: payload.currency,
-      })
-      .returning();
-    return record;
-  },
-  async createSubscriptionPayment(payload: {
-    userId: string;
-    subscriptionId: string;
-    paymentTransactionId: string;
-    productId: string;
-    amount: number;
-    currency: string;
-  }) {
-    const [record] = await db
-      .insert(transaction)
-      .values({
-        userId: payload.userId,
-        subscriptionId: payload.subscriptionId,
-        paymentPlatform: 'creem',
-        paymentTransactionId: payload.paymentTransactionId,
-        productId: payload.productId,
-        type: 'subscription_payment',
-        amount: payload.amount,
-        currency: payload.currency,
-      })
-      .returning();
-    return record;
-  },
-};
-
-// 数据访问层：积分
-const creditRepo = {
-  async grantCredits(payload: {
-    userId: string;
-    transactionId: string;
-    type: string;
-    amount: number;
-    expiresAt: Date | null;
-  }) {
-    return db.insert(credit).values({
-      userId: payload.userId,
-      transactionId: payload.transactionId,
-      type: payload.type,
-      amount: payload.amount,
-      consumed: 0,
-      issuedAt: new Date(),
-      expiresAt: payload.expiresAt,
-    });
-  },
-};
-
-// 数据访问层：用户
-const userRepo = {
-  async updateCurrentSubscription(userId: string, subscriptionId: string) {
-    return db
-      .update(user)
-      .set({ currentSubscriptionId: subscriptionId, updatedAt: new Date() })
-      .where(eq(user.id, userId));
-  },
-  async updatePlan(userId: string, planType: string, subscriptionId: string) {
-    return db
-      .update(user)
-      .set({ type: planType, currentSubscriptionId: subscriptionId, updatedAt: new Date() })
-      .where(eq(user.id, userId));
-  },
-  async revokeAccess(userId: string) {
-    return db
-      .update(user)
-      .set({ type: 'free', currentSubscriptionId: null, updatedAt: new Date() })
-      .where(eq(user.id, userId));
-  },
 };
 
 // --- 事件处理：一次性点数包购买（写入交易 & 发放积分） ---
@@ -233,19 +77,19 @@ async function handleCheckoutCompleted(data: any) {
   const paymentTransactionId = order?.transaction || order?.id || id;
 
   try {
-    const existingTransaction = await transactionRepo.findByPaymentTransactionId(
+    const existingTransaction = await transactionService.findTransactionByPaymentTransactionId(
       paymentTransactionId,
     );
 
     if (existingTransaction) {
-      console.log(`⚠ Duplicate checkout detected for transaction ${paymentTransactionId}`);
+      console.log(`[WARN] Duplicate checkout detected for transaction ${paymentTransactionId}`);
       return;
     }
 
     const amount = order?.amount_paid ?? order?.amount ?? product?.price ?? 0;
     const currency = order?.currency || product?.currency || 'USD';
 
-    const transactionRecord = await transactionRepo.createOneTimePayment({
+    const transactionRecord = await transactionService.createOneTimePaymentTransaction({
       userId,
       paymentTransactionId,
       productId,
@@ -253,9 +97,13 @@ async function handleCheckoutCompleted(data: any) {
       currency,
     });
 
+    if (!transactionRecord) {
+      throw new Error('Failed to create transaction record');
+    }
+
     const expiresAt = new Date(Date.now() + creditPack.validDays * 24 * 60 * 60 * 1000);
 
-    await creditRepo.grantCredits({
+    await creditService.grantCredits({
       userId,
       transactionId: transactionRecord.id,
       type: `credit_pack_${creditPack.id}`,
@@ -306,7 +154,7 @@ async function handleSubscriptionActive(data: any) {
   }
 
   try {
-    const [subscriptionRecord] = await subscriptionRepo.create({
+    const subscriptionRecord = await subscriptionService.createSubscription({
       userId,
       paymentSubscriptionId: id,
       paymentCustomerId: customer?.id || '',
@@ -318,7 +166,11 @@ async function handleSubscriptionActive(data: any) {
       nextBillingAt: next_transaction_date ? new Date(next_transaction_date) : null,
     });
 
-    await userRepo.updateCurrentSubscription(userId, subscriptionRecord.id);
+    if (!subscriptionRecord) {
+      throw new Error('Failed to create subscription record');
+    }
+
+    await userService.updateUserCurrentSubscription(userId, subscriptionRecord.id);
 
     console.log(`[OK] Created subscription for user ${userId} - Subscription ID: ${id}`);
   } catch (error) {
@@ -371,13 +223,13 @@ async function handleSubscriptionPaid(data: any) {
   const quotaAmount = getSubscriptionQuota(pricingTier.subscriptionPlanType);
 
   try {
-    let existingSubscription = await subscriptionRepo.findByPaymentId(id);
+    let existingSubscription = await subscriptionService.findSubscriptionByPaymentId(id);
     if (!existingSubscription) {
-      existingSubscription = await subscriptionRepo.findActiveByUserId(userId);
+      existingSubscription = await subscriptionService.findActiveSubscriptionByUserId(userId);
     }
 
     if (!existingSubscription) {
-      const [subscriptionRecord] = await subscriptionRepo.create({
+      const subscriptionRecord = await subscriptionService.createSubscription({
         userId,
         paymentSubscriptionId: id,
         paymentCustomerId: payload.customer?.id || '',
@@ -388,8 +240,13 @@ async function handleSubscriptionPaid(data: any) {
         expiresAt: current_period_end_date ? new Date(current_period_end_date) : null,
         nextBillingAt: next_transaction_date ? new Date(next_transaction_date) : null,
       });
+
+      if (!subscriptionRecord) {
+        throw new Error('Failed to create subscription record');
+      }
+
       existingSubscription = subscriptionRecord;
-      await userRepo.updateCurrentSubscription(userId, subscriptionRecord.id);
+      await userService.updateUserCurrentSubscription(userId, subscriptionRecord.id);
     }
 
     const paymentTransactionId = lastTransactionId || lastTransaction?.id;
@@ -397,10 +254,10 @@ async function handleSubscriptionPaid(data: any) {
       lastTransaction?.amount_paid ?? lastTransaction?.amountPaid ?? lastTransaction?.amount ?? 0,
     );
     const existingTransaction = paymentTransactionId
-      ? await transactionRepo.findByPaymentTransactionId(paymentTransactionId)
+      ? await transactionService.findTransactionByPaymentTransactionId(paymentTransactionId)
       : null;
 
-    await subscriptionRepo.updateById(existingSubscription.id, {
+    await subscriptionService.updateSubscriptionById(existingSubscription.id, {
       productId: resolvedProductId,
       planType: pricingTier.subscriptionPlanType,
       amount: product.price,
@@ -410,7 +267,7 @@ async function handleSubscriptionPaid(data: any) {
       updatedAt: new Date(),
     });
 
-    await userRepo.updatePlan(userId, pricingTier.planType, existingSubscription.id);
+    await userService.updateUserPlan(userId, pricingTier.planType, existingSubscription.id);
 
     console.log(
       `[OK] Subscription updated: ${id} - Plan: ${pricingTier.subscriptionPlanType}, Quota: ${quotaAmount}`,
@@ -419,11 +276,11 @@ async function handleSubscriptionPaid(data: any) {
     if (paidAmount > 0 && paymentTransactionId) {
       if (existingTransaction) {
         console.log(
-          `⚠ Duplicate transaction detected: ${paymentTransactionId}`,
+          `[WARN] Duplicate transaction detected: ${paymentTransactionId}`,
         );
         return;
       }
-      const transactionRecord = await transactionRepo.createSubscriptionPayment({
+      const transactionRecord = await transactionService.createSubscriptionPaymentTransaction({
         userId,
         subscriptionId: existingSubscription.id,
         paymentTransactionId,
@@ -432,11 +289,15 @@ async function handleSubscriptionPaid(data: any) {
         currency: lastTransaction?.currency || 'USD',
       });
 
+      if (!transactionRecord) {
+        throw new Error('Failed to create transaction record');
+      }
+
       console.log(
         `[OK] Created transaction ${transactionRecord.id} - Amount paid: ${paidAmount} ${lastTransaction?.currency || 'USD'}`,
       );
 
-      await creditRepo.grantCredits({
+      await creditService.grantCredits({
         userId,
         transactionId: transactionRecord.id,
         type: pricingTier.subscriptionPlanType,
@@ -449,7 +310,7 @@ async function handleSubscriptionPaid(data: any) {
       );
     } else {
       console.log(
-        `⚠ No quota granted: amount_paid is ${paidAmount}`,
+        `[WARN] No quota granted: amount_paid is ${paidAmount}`,
       );
     }
   } catch (error) {
@@ -493,7 +354,7 @@ async function handleRevokeAccess(data: any) {
   }
 
   try {
-    await userRepo.revokeAccess(userId);
+    await userService.revokeUserAccess(userId);
 
     console.log(`[OK] Revoked access from user ${userId} (${customer?.email})`);
   } catch (error) {

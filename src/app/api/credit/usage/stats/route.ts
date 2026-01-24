@@ -1,8 +1,6 @@
 import { NextResponse, NextRequest } from "next/server";
-import { db } from "@/server/db";
-import { creditTransaction } from "@/server/db/schema";
-import { eq } from "drizzle-orm";
 import { getSessionUserId } from "@/server/auth-utils";
+import { getCreditUsageStats } from "@/server/db/services/credit-transaction";
 
 export async function GET(request: NextRequest) {
   try {
@@ -12,24 +10,8 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const transactions = await db
-      .select({
-        type: creditTransaction.type,
-        amount: creditTransaction.amount,
-      })
-      .from(creditTransaction)
-      .where(eq(creditTransaction.userId, userId));
-
-    const totalConsumed = transactions
-      .filter((t) => t.type === "consume")
-      .reduce((sum, t) => sum + Math.abs(t.amount), 0);
-
-    const totalRecords = transactions.length;
-    const consumeRecords = transactions.filter((t) => t.type === "consume");
-    const avgPerRecord =
-      consumeRecords.length > 0
-        ? Math.round(totalConsumed / consumeRecords.length)
-        : 0;
+    const { totalConsumed, totalRecords, avgPerRecord } =
+      await getCreditUsageStats(userId);
 
     return NextResponse.json({
       totalConsumed,

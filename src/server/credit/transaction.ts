@@ -2,9 +2,16 @@
  * 积分交易管理模块
  */
 
-import { db } from "@/server/db";
-import { credit, creditTransaction } from "@/server/db/schema";
-import { eq, and, gt, or, isNull } from "drizzle-orm";
+import {
+  getCreditById,
+  listConsumableCredits,
+  updateCreditConsumed,
+} from "@/server/db/services/credit";
+import {
+  createCreditTransaction,
+  getCreditTransactionById,
+  hasRefundForTransaction,
+} from "@/server/db/services/credit-transaction";
 
 export interface ConsumeCreditResult {
   success: boolean;
@@ -34,17 +41,7 @@ export async function consumeCredit(
       };
     }
 
-    const availableCredits = await db
-      .select()
-      .from(credit)
-      .where(
-        and(
-          eq(credit.userId, userId),
-          gt(credit.amount, credit.consumed),
-          or(isNull(credit.expiresAt), gt(credit.expiresAt, new Date()))
-        )
-      )
-      .orderBy(credit.issuedAt);
+    const availableCredits = await listConsumableCredits(userId);
 
     if (availableCredits.length === 0) {
       return {
@@ -81,13 +78,7 @@ export async function consumeCredit(
         balanceBefore = available;
       }
 
-      await db
-        .update(credit)
-        .set({
-          consumed: creditRecord.consumed + toConsume,
-          updatedAt: new Date(),
-        })
-        .where(eq(credit.id, creditRecord.id));
+      await updateCreditConsumed(creditRecord.id, creditRecord.consumed + toConsume);
 
       remainingToConsume -= toConsume;
 
@@ -103,18 +94,22 @@ export async function consumeCredit(
       };
     }
 
-    const [transaction] = await db
-      .insert(creditTransaction)
-      .values({
-        userId,
-        creditId: selectedCreditId,
-        type: "consume",
-        amount: -amount,
-        balanceBefore,
-        balanceAfter,
-        note,
-      })
-      .returning();
+    const transaction = await createCreditTransaction({
+      userId,
+      creditId: selectedCreditId,
+      type: "consume",
+      amount: -amount,
+      balanceBefore,
+      balanceAfter,
+      note,
+    });
+
+    if (!transaction) {
+      return {
+        success: false,
+        error: "Failed to create transaction record",
+      };
+    }
 
     return {
       success: true,
@@ -138,10 +133,7 @@ export async function refundCredit(
   note: string
 ): Promise<RefundCreditResult> {
   try {
-    const [consumeTransaction] = await db
-      .select()
-      .from(creditTransaction)
-      .where(eq(creditTransaction.id, consumeTransactionId));
+    const consumeTransaction = await getCreditTransactionById(consumeTransactionId);
 
     if (!consumeTransaction) {
       return {
@@ -157,17 +149,8 @@ export async function refundCredit(
       };
     }
 
-    const existingRefunds = await db
-      .select()
-      .from(creditTransaction)
-      .where(
-        and(
-          eq(creditTransaction.relatedTransactionId, consumeTransactionId),
-          eq(creditTransaction.type, "refund")
-        )
-      );
-
-    if (existingRefunds.length > 0) {
+    const alreadyRefunded = await hasRefundForTransaction(consumeTransactionId);
+    if (alreadyRefunded) {
       return {
         success: false,
         error: "Transaction has already been refunded",
@@ -183,10 +166,7 @@ export async function refundCredit(
       };
     }
 
-    const [targetCredit] = await db
-      .select()
-      .from(credit)
-      .where(eq(credit.id, consumeTransaction.creditId));
+    const targetCredit = await getCreditById(consumeTransaction.creditId);
 
     if (!targetCredit) {
       return {
@@ -197,29 +177,30 @@ export async function refundCredit(
 
     const balanceBefore = targetCredit.amount - targetCredit.consumed;
 
-    await db
-      .update(credit)
-      .set({
-        consumed: Math.max(0, targetCredit.consumed - refundAmount),
-        updatedAt: new Date(),
-      })
-      .where(eq(credit.id, targetCredit.id));
+    await updateCreditConsumed(
+      targetCredit.id,
+      Math.max(0, targetCredit.consumed - refundAmount)
+    );
 
     const balanceAfter = balanceBefore + refundAmount;
 
-    const [refundTransaction] = await db
-      .insert(creditTransaction)
-      .values({
-        userId: consumeTransaction.userId,
-        creditId: targetCredit.id,
-        type: "refund",
-        amount: refundAmount,
-        balanceBefore,
-        balanceAfter,
-        relatedTransactionId: consumeTransactionId,
-        note,
-      })
-      .returning();
+    const refundTransaction = await createCreditTransaction({
+      userId: consumeTransaction.userId,
+      creditId: targetCredit.id,
+      type: "refund",
+      amount: refundAmount,
+      balanceBefore,
+      balanceAfter,
+      relatedTransactionId: consumeTransactionId,
+      note,
+    });
+
+    if (!refundTransaction) {
+      return {
+        success: false,
+        error: "Failed to create refund transaction",
+      };
+    }
 
     return {
       success: true,

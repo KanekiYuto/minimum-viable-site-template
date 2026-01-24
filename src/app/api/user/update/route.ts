@@ -1,8 +1,6 @@
 import { NextResponse } from "next/server";
-import { db } from "@/server/db";
-import { user } from "@/server/db/schema";
-import { eq } from "drizzle-orm";
 import { getSessionUserId } from "@/server/auth-utils";
+import { updateUser } from "@/server/db/services/user";
 
 export async function PUT(request: Request) {
   try {
@@ -19,14 +17,7 @@ export async function PUT(request: Request) {
       return NextResponse.json({ error: "Name is required" }, { status: 400 });
     }
 
-    const [updatedUser] = await db
-      .update(user)
-      .set({
-        name,
-        updatedAt: new Date(),
-      })
-      .where(eq(user.id, userId))
-      .returning();
+    const updatedUser = await updateUser(userId, { name });
 
     if (!updatedUser) {
       return NextResponse.json({ error: "Update failed" }, { status: 500 });

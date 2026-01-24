@@ -1,8 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { db } from "@/server/db";
-import { subscription } from "@/server/db/schema";
-import { and, eq } from "drizzle-orm";
 import { getSessionUserId } from "@/server/auth-utils";
+import { getCurrentActiveSubscriptionByUserId } from "@/server/db/services/subscription";
 
 export async function GET(request: NextRequest) {
   try {
@@ -15,17 +13,7 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const [currentSubscription] = await db
-      .select()
-      .from(subscription)
-      .where(
-        and(
-          eq(subscription.userId, userId),
-          eq(subscription.status, "active")
-        )
-      )
-      .orderBy(subscription.createdAt)
-      .limit(1);
+    const currentSubscription = await getCurrentActiveSubscriptionByUserId(userId);
 
     if (!currentSubscription) {
       return NextResponse.json({
