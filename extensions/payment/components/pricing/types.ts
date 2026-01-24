@@ -28,7 +28,6 @@ export interface SubscriptionPricingPlan {
   ctaText: string;
   colorClass: string;
   outerColor?: string;
-  productId?: string;
 }
 
 export interface CreditPackPlan {
@@ -39,6 +38,4 @@ export interface CreditPackPlan {
   validDays: number;
   bonusRate?: number;
   accentColor?: string;
-  productId?: string;
 }
-

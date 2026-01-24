@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import { useUserStore } from "@/store/useUserStore";
-import { getPlanInfo } from "@/lib/utils/plan";
+import { getPlanInfo } from "@/app/_lib/plan";
 import { ManageSubscriptionButton } from "@/components/subscription/ManageSubscriptionButton";
 import { Badge } from "@/components/ui/badge";
 

@@ -1,6 +1,6 @@
 import type { NextRequest } from 'next/server';
 import { getPaymentWebhookAdapter } from '@extensions/payment/core/webhooks';
-import { getCreemRuntimeConfigFromEnv } from '@/shared/payment/config/payment-runtime';
+import { getCreemRuntimeConfigFromEnv } from '@/server/payment/runtime-config';
 import { createCreemWebhookHandlers } from '@/server/payment/creem-webhook-handlers';
 
 /**

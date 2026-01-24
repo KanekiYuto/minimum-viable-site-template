@@ -5,7 +5,7 @@ import { useTranslations } from "next-intl";
 import { useSettingsNav } from "../_components/SettingsNavContext";
 import { useUserStore } from "@/store/useUserStore";
 import { useCreditStore } from "@/store/useCreditStore";
-import { getPlanInfo } from "@/lib/utils/plan";
+import { getPlanInfo } from "@/app/_lib/plan";
 import { CreditsSkeleton } from "./_components/CreditsSkeleton";
 import { CreditsHeader } from "./_components/CreditsHeader";
 import { CreditsOverview } from "./_components/CreditsOverview";

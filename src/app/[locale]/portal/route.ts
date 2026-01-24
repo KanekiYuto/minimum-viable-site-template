@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getCreemClient } from "@extensions/payment/core/creem-client";
 import { getSessionUserId } from "@/server/auth-utils";
-import { getCreemRuntimeConfigFromEnv } from "@/shared/payment/config/payment-runtime";
+import { getCreemRuntimeConfigFromEnv } from "@/server/payment/runtime-config";
 import { findOwnedSubscriptionByUserAndCustomerId } from "@/server/db/services/subscription";
 
 /**

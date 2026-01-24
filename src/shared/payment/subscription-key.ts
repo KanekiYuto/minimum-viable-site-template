@@ -38,4 +38,3 @@ export function getPlanIdFromSubscriptionPlanType(value: string): string {
   const parsed = parseSubscriptionPlanType(value);
   return parsed.planId || 'free';
 }
-

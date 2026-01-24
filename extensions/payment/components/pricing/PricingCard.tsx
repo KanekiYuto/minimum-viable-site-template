@@ -3,7 +3,6 @@
 import { Check, X, HelpCircle } from "lucide-react";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { createPaymentCheckout } from "../../core/client";
 import type { PricingFeature, SubscriptionPricingPlan } from "./types";
 
 export type PricingCardLabels = {
@@ -29,6 +28,10 @@ interface PricingCardProps {
   user?: { id: string; email: string; name?: string } | null;
   freePlanHref?: string;
   labels: PricingCardLabels;
+  onSubscribe?: (args: {
+    planId: string;
+    billingCycle: "monthly" | "yearly";
+  }) => Promise<void> | void;
 }
 
 const POPULAR_BADGE_ICON = (
@@ -141,7 +144,7 @@ function CTAButton({
   user?: { id: string; email: string; name?: string } | null;
   isCurrent: boolean;
   isLoading: boolean;
-  onPaymentClick: () => void;
+  onPaymentClick?: () => void;
   freePlanHref: string;
   labels: PricingCardLabels;
 }) {
@@ -187,7 +190,7 @@ function CTAButton({
     );
   }
 
-  if (!plan.productId) {
+  if (!onPaymentClick) {
     return (
       <button
         disabled
@@ -269,7 +272,7 @@ function CardContent({
   user?: { id: string; email: string; name?: string } | null;
   isCurrent: boolean;
   isLoading: boolean;
-  onPaymentClick: () => void;
+  onPaymentClick?: () => void;
   freePlanHref: string;
   labels: PricingCardLabels;
 }) {
@@ -320,6 +323,7 @@ export function PricingCard({
   user,
   freePlanHref = "/",
   labels,
+  onSubscribe,
 }: PricingCardProps) {
   const [isLoading, setIsLoading] = useState(false);
 
@@ -331,30 +335,13 @@ export function PricingCard({
   const originalPrice = billingCycle === "yearly" ? plan.monthlyPrice * 12 : 0;
 
   const handlePaymentClick = () => {
-    if (!plan.productId || !user) {
+    if (!user || !onSubscribe) {
       return;
     }
     setIsLoading(true);
-    createPaymentCheckout({
-      productId: plan.productId,
-      type: "sub",
-      metadata: {
-        userId: user.id,
-        planId: plan.id,
-        billingCycle,
-      },
-      customer: {
-        email: user.email,
-      },
-    })
-      .then((data) => {
-        if (data.checkoutUrl) {
-          window.location.href = data.checkoutUrl;
-        }
-      })
-      .finally(() => {
-        setIsLoading(false);
-      });
+    Promise.resolve(onSubscribe({ planId: plan.id, billingCycle })).finally(() => {
+      setIsLoading(false);
+    });
   };
 
   const cardInnerContent = (
@@ -369,7 +356,7 @@ export function PricingCard({
         user={user}
         isCurrent={isCurrent}
         isLoading={isLoading}
-        onPaymentClick={handlePaymentClick}
+        onPaymentClick={onSubscribe ? handlePaymentClick : undefined}
         freePlanHref={freePlanHref}
         labels={labels}
       />
@@ -410,4 +397,3 @@ export function PricingCard({
     </div>
   );
 }
-

@@ -7,9 +7,9 @@ import { CheckCircle2, ArrowRight, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import {
-  getCreditPackByProductId,
-  getSubscriptionPlanByProductId,
-} from '@/shared/payment/config/payment';
+  getCreditPackById,
+  getSubscriptionBySku,
+} from '@/shared/payment/catalog/catalog';
 
 // 声明 gtag 函数类型
 declare global {
@@ -27,16 +27,16 @@ export default function SubscriptionSuccessClient() {
   const [isRedirecting, setIsRedirecting] = useState(false);
 
   // 从 URL 参数获取订阅/Checkout ID
-  const productId = searchParams.get('p_id');
+  const sku = searchParams.get('sku');
   const paymentType = searchParams.get('type');
   
   const isOneTime = paymentType === 'one-time';
   const isSubscription = paymentType === 'sub';
-  const productCreditPack = productId ? getCreditPackByProductId(productId) : null;
-  const subscriptionPlan = productId ? getSubscriptionPlanByProductId(productId) : null;
+  const productCreditPack = sku && isOneTime ? getCreditPackById(sku) : null;
+  const subscriptionPlan = sku && isSubscription ? getSubscriptionBySku(sku) : null;
 
   const { subscriptionData, creditPackData } = useMemo(() => {
-    if (!productId) {
+    if (!sku) {
       return { subscriptionData: null, creditPackData: null };
     }
 
@@ -60,7 +60,6 @@ export default function SubscriptionSuccessClient() {
       return {
         subscriptionData: subscriptionPlan
           ? {
-              id: subscriptionPlan.subscriptionPlanType,
               planType: subscriptionPlan.planType,
               amount: Math.round(subscriptionPlan.price * 100),
               currency: 'USD',
@@ -77,7 +76,6 @@ export default function SubscriptionSuccessClient() {
     if (subscriptionPlan && !productCreditPack) {
       return {
         subscriptionData: {
-          id: subscriptionPlan.subscriptionPlanType,
           planType: subscriptionPlan.planType,
           amount: Math.round(subscriptionPlan.price * 100),
           currency: 'USD',
@@ -105,10 +103,10 @@ export default function SubscriptionSuccessClient() {
     }
 
     return { subscriptionData: null, creditPackData: null };
-  }, [productId, isOneTime, isSubscription, productCreditPack, subscriptionPlan]);
+  }, [sku, isOneTime, isSubscription, productCreditPack, subscriptionPlan]);
 
   const isCreditPackFlow =
-    isOneTime || Boolean(productCreditPack) || (!subscriptionPlan && Boolean(productId));
+    isOneTime || Boolean(productCreditPack) || (!subscriptionPlan && Boolean(sku));
 
   // 跳转到积分页面
   const handleRedirect = useCallback(() => {

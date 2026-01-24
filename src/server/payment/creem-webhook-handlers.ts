@@ -1,9 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import { getSubscriptionQuota } from "@/shared/payment/entitlements/subscription";
 import {
-  getCreditPackByProductId,
-  getPricingTierByProductId,
-  getSubscriptionQuota,
-} from '@/shared/payment/config/payment';
+  getCreditPackByCreemProductId,
+  getSubscriptionByCreemProductId,
+} from "@/server/payment/providers/creem/mapping";
 import type { CreemWebhookHandlers } from '@extensions/payment/core/webhooks/creem';
 import * as creditService from '@/server/db/services/credit';
 import * as subscriptionService from '@/server/db/services/subscription';
@@ -63,7 +63,7 @@ async function handleCheckoutCompleted(data: any) {
 
   const userId = getUserIdFromMetadata(metadata);
   const productId = product?.id;
-  const creditPack = getCreditPackByProductId(productId || '');
+  const creditPack = getCreditPackByCreemProductId(productId || "");
 
   if (!userId || !productId || !creditPack) {
     console.error('[ERR] Checkout completed: Missing required data', {
@@ -136,19 +136,19 @@ async function handleSubscriptionActive(data: any) {
     return;
   }
 
-  const pricingTier = getPricingTierByProductId(product.id);
-  if (!pricingTier) {
+  const subscriptionPlan = getSubscriptionByCreemProductId(product.id);
+  if (!subscriptionPlan) {
     console.error('[ERR] Subscription active: Product ID not found in pricing config', {
       productId: product.id,
     });
     return;
   }
 
-  if (!userId || !pricingTier.subscriptionPlanType) {
+  if (!userId) {
     console.error('[ERR] Subscription active: Missing required data', {
       userId,
       productId: product.id,
-      planInfo: pricingTier,
+      planInfo: subscriptionPlan,
     });
     return;
   }
@@ -159,7 +159,7 @@ async function handleSubscriptionActive(data: any) {
       paymentSubscriptionId: id,
       paymentCustomerId: customer?.id || '',
       productId: product.id,
-      planType: pricingTier.subscriptionPlanType,
+      planType: subscriptionPlan.subscriptionSku,
       amount: product.price,
       currency: product.currency || 'USD',
       expiresAt: current_period_end_date ? new Date(current_period_end_date) : null,
@@ -203,24 +203,24 @@ async function handleSubscriptionPaid(data: any) {
     return;
   }
 
-  const pricingTier = getPricingTierByProductId(resolvedProductId);
-  if (!pricingTier) {
+  const subscriptionPlan = getSubscriptionByCreemProductId(resolvedProductId);
+  if (!subscriptionPlan) {
     console.error('[ERR] Subscription paid: Product ID not found in pricing config', {
       productId: resolvedProductId,
     });
     return;
   }
 
-  if (!userId || !pricingTier.subscriptionPlanType) {
+  if (!userId) {
     console.error('[ERR] Subscription paid: Missing required data', {
       userId,
       productId: resolvedProductId,
-      pricingTier,
+      subscriptionPlan,
     });
     return;
   }
 
-  const quotaAmount = getSubscriptionQuota(pricingTier.subscriptionPlanType);
+  const quotaAmount = getSubscriptionQuota(subscriptionPlan.subscriptionSku);
 
   try {
     let existingSubscription = await subscriptionService.findSubscriptionByPaymentId(id);
@@ -234,7 +234,7 @@ async function handleSubscriptionPaid(data: any) {
         paymentSubscriptionId: id,
         paymentCustomerId: payload.customer?.id || '',
         productId: resolvedProductId,
-        planType: pricingTier.subscriptionPlanType,
+        planType: subscriptionPlan.subscriptionSku,
         amount: product.price,
         currency: product.currency || 'USD',
         expiresAt: current_period_end_date ? new Date(current_period_end_date) : null,
@@ -259,7 +259,7 @@ async function handleSubscriptionPaid(data: any) {
 
     await subscriptionService.updateSubscriptionById(existingSubscription.id, {
       productId: resolvedProductId,
-      planType: pricingTier.subscriptionPlanType,
+      planType: subscriptionPlan.subscriptionSku,
       amount: product.price,
       currency: product.currency,
       expiresAt: current_period_end_date ? new Date(current_period_end_date) : null,
@@ -267,10 +267,10 @@ async function handleSubscriptionPaid(data: any) {
       updatedAt: new Date(),
     });
 
-    await userService.updateUserPlan(userId, pricingTier.planType, existingSubscription.id);
+    await userService.updateUserPlan(userId, subscriptionPlan.planType, existingSubscription.id);
 
     console.log(
-      `[OK] Subscription updated: ${id} - Plan: ${pricingTier.subscriptionPlanType}, Quota: ${quotaAmount}`,
+      `[OK] Subscription updated: ${id} - Plan: ${subscriptionPlan.subscriptionSku}, Quota: ${quotaAmount}`,
     );
 
     if (paidAmount > 0 && paymentTransactionId) {
@@ -300,13 +300,13 @@ async function handleSubscriptionPaid(data: any) {
       await creditService.grantCredits({
         userId,
         transactionId: transactionRecord.id,
-        type: pricingTier.subscriptionPlanType,
+        type: subscriptionPlan.subscriptionSku,
         amount: quotaAmount,
         expiresAt: current_period_end_date ? new Date(current_period_end_date) : null,
       });
 
       console.log(
-        `[OK] Granted ${quotaAmount} quota to user ${userId} - Plan: ${pricingTier.subscriptionPlanType}`,
+        `[OK] Granted ${quotaAmount} quota to user ${userId} - Plan: ${subscriptionPlan.subscriptionSku}`,
       );
     } else {
       console.log(

@@ -1,7 +1,6 @@
 "use client";
 
 import { useMemo, useState, type ReactNode } from "react";
-import { createPaymentCheckout } from "../../core/client";
 import type { CreditPackPlan, PricingUser } from "./types";
 
 /**
@@ -39,14 +38,15 @@ interface CreditPacksProps {
   user?: PricingUser;
   /** 文案/富文本渲染器 */
   labels: CreditPacksLabels;
+  onBuyPack?: (pack: CreditPackPlan) => Promise<void> | void;
 }
 
 /**
  * 点数包列表（一次性购买）。
  *
- * 点击购买会调用 `createPaymentCheckout` 获取 checkoutUrl 并跳转。
+ * 点击购买会调用 `onBuyPack`（由上层注入 checkout 逻辑）。
  */
-export function CreditPacks({ packs, user, labels }: CreditPacksProps) {
+export function CreditPacks({ packs, user, labels, onBuyPack }: CreditPacksProps) {
   const [loadingPackId, setLoadingPackId] = useState<string | null>(null);
 
   const groupedPacks = useMemo(() => {
@@ -76,26 +76,11 @@ export function CreditPacks({ packs, user, labels }: CreditPacksProps) {
   };
 
   const startCheckout = async (pack: CreditPackPlan) => {
-    if (!user || !pack.productId) return;
+    if (!user || !onBuyPack) return;
 
     setLoadingPackId(pack.id);
     try {
-      const { checkoutUrl } = await createPaymentCheckout({
-        productId: pack.productId,
-        type: "one-time",
-        metadata: {
-          userId: user.id,
-          packId: pack.id,
-          source: "pricing",
-        },
-        customer: {
-          email: user.email,
-        },
-      });
-
-      if (checkoutUrl) {
-        window.location.href = checkoutUrl;
-      }
+      await onBuyPack(pack);
     } finally {
       setLoadingPackId(null);
     }
@@ -103,7 +88,7 @@ export function CreditPacks({ packs, user, labels }: CreditPacksProps) {
 
   const getButtonLabel = (pack: CreditPackPlan, isLoading: boolean) => {
     if (!user) return labels.loginRequired;
-    if (!pack.productId) return labels.configuring;
+    if (!onBuyPack) return labels.configuring;
     if (isLoading) return labels.processing;
     return labels.cta;
   };
@@ -158,7 +143,7 @@ export function CreditPacks({ packs, user, labels }: CreditPacksProps) {
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 2xl:grid-cols-4 gap-4">
               {items.map((pack) => {
                 const isLoading = loadingPackId === pack.id;
-                const buttonDisabled = !user || !pack.productId || isLoading;
+                const buttonDisabled = !user || !onBuyPack || isLoading;
                 const buttonLabel = getButtonLabel(pack, isLoading);
 
                 const bonusPercent = Math.round((pack.bonusRate ?? 0) * 100);

@@ -2,58 +2,37 @@
 
 import { useTranslations } from "next-intl";
 import { motion } from "framer-motion";
-import { useEffect, useMemo, useState } from "react";
-import { useUserStore } from "@/store/useUserStore";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { siteConfig } from "@/config/site";
-import { PAYMENT_CONFIG } from "@/shared/payment/config";
-import { buildSubscriptionPlanType } from "@/shared/payment/config/subscription-key";
+import { createPaymentCheckout } from "@/lib/payment/createPaymentCheckout";
+import { buildSubscriptionPlanType } from "@/shared/payment/subscription-key";
+import { useUserStore } from "@/store/useUserStore";
 import { FAQ } from "@extensions/components/FAQ";
+import { PaymentIcons, type PaymentIconMethod, type PaymentIconsLabels } from "@extensions/payment/components/pricing/PaymentIcons";
+import { Pricing, type PricingLabels } from "@extensions/payment/components/pricing/Pricing";
+import type { CreditPacksLabels } from "@extensions/payment/components/pricing/CreditPacks";
+import type { PricingCardLabels } from "@extensions/payment/components/pricing/PricingCard";
+import type {
+  BillingCycleConfig,
+  CreditPackPlan,
+  PricingUser,
+  SubscriptionPricingPlan,
+} from "@extensions/payment/components/pricing/types";
 import {
-  PRICING_PLANS_METADATA,
-  PRICING_PLAN_ORDER,
-  YEARLY_DISCOUNT_PERCENT,
-  CREDIT_PACKS,
-  getSubscriptionCreditsConfig,
-  getCreemPayProductId,
-  getCreemPayCreditPackProductId,
-  calculateYearlyPrice,
-  CREDIT_PACK_ACCENT_COLORS_BY_NAME,
-  getPlanDisabledFeatureIndexes,
-} from "@/shared/payment/config/payment";
-import {
-  PaymentIcons,
-  Pricing,
-  type BillingCycleConfig,
-  type CreditPackPlan,
-  type CreditPacksLabels,
-  type PricingCardLabels,
-  type PricingLabels,
-  type PaymentIconsLabels,
-  type SubscriptionPricingPlan,
-  type PaymentIconMethod,
-  type PricingUser,
-} from "@extensions/payment/components/pricing";
+  buildBillingCycles,
+  buildCreditPacks,
+  buildSubscriptionPlansByCycle,
+} from "../_lib/buildPricingData";
 
-/**
- * Pricing 页面（Client Component）
- *
- * - 负责：从配置构造展示数据 + 组装 i18n 文案，并注入到 `extensions/payment` 组件
- * - 不负责：支付运行时逻辑（checkout/webhook 等），这些在 `extensions/payment/core`
- *
- * 约束：`extensions/payment/components/**` 内不做国际化，这里集中处理 `useTranslations(...)`。
- */
 export default function PricingPageClient() {
-  // i18n：按子模块拆分，便于给不同组件注入各自所需文案
   const tPricing = useTranslations("pricing");
   const tCard = useTranslations("pricing.card");
   const tPacks = useTranslations("pricing.packs");
   const tPayment = useTranslations("pricing.payment");
   const tFaq = useTranslations("pricing.faq");
 
-  // 用户态：用于 CTA 状态（登录/当前方案）与拉取当前订阅信息
   const { user, isAuthenticated } = useUserStore();
 
-  // 当前订阅方案类型：形如 `${billingCycle}_${planId}`，用于 PricingCard 的“当前方案”展示
   const [currentSubscriptionPlanType, setCurrentSubscriptionPlanType] =
     useState<string | null>(null);
   const effectiveCurrentSubscriptionPlanType =
@@ -64,12 +43,13 @@ export default function PricingPageClient() {
       return;
     }
 
-    // 登录后查询当前订阅（避免在扩展组件内做数据请求）
     async function fetchCurrentSubscription() {
       try {
         const response = await fetch("/api/subscription/current");
         const result = await response.json();
-        setCurrentSubscriptionPlanType(result.success ? result.data?.planType ?? null : null);
+        setCurrentSubscriptionPlanType(
+          result.success ? result.data?.planType ?? null : null,
+        );
       } catch {
         setCurrentSubscriptionPlanType(null);
       }
@@ -78,120 +58,66 @@ export default function PricingPageClient() {
     fetchCurrentSubscription();
   }, [isAuthenticated, user]);
 
-  // 注入到 pricing 组件的最小用户信息
   const pricingUser: PricingUser = user
     ? { id: user.id, email: user.email, name: user.name ?? undefined }
     : null;
 
-  // 计费周期切换（订阅：月/年；一次性：点数包）
   const billingCycles = useMemo<BillingCycleConfig[]>(
-    () => [
-      { id: "monthly", label: tPricing("billingCycle.monthly") },
-      { id: "yearly", label: tPricing("billingCycle.yearly"), savePercent: YEARLY_DISCOUNT_PERCENT },
-      { id: "onetime", label: tPricing("billingCycle.onetime") },
-    ],
+    () => buildBillingCycles(tPricing),
     [tPricing],
   );
 
-  // 从配置构造订阅套餐（含 UI 展示用文案/feature 文本）
-  const subscriptionPlansByCycle = useMemo(() => {
-    const buildSubscriptionPlans = (
-      billingCycle: "monthly" | "yearly",
-    ): SubscriptionPricingPlan[] => {
-      const getPlanKey = (planId: string) =>
-        buildSubscriptionPlanType(billingCycle, planId);
+  const subscriptionPlansByCycle = useMemo<
+    Record<"monthly" | "yearly", SubscriptionPricingPlan[]>
+  >(() => buildSubscriptionPlansByCycle(tPricing), [tPricing]);
 
-      const getProductId = (planId: string) => getCreemPayProductId(getPlanKey(planId));
+  const creditPacks = useMemo<CreditPackPlan[]>(() => buildCreditPacks(), []);
 
-      const getCreditsConfig = (planId: string) => getSubscriptionCreditsConfig(getPlanKey(planId));
+  const startSubscriptionCheckout = useCallback(
+    async (args: { planId: string; billingCycle: "monthly" | "yearly" }) => {
+      if (!user) return;
 
-      const getYearlyPrice = (planId: string, monthlyPrice: number) => {
-        const yearlyKey = buildSubscriptionPlanType("yearly", planId);
-        const yearlyPrice = PAYMENT_CONFIG.subscriptions[yearlyKey]?.price;
-        return typeof yearlyPrice === "number" ? yearlyPrice : calculateYearlyPrice(monthlyPrice);
-      };
-
-      type FeatureValues = Record<string, string | number | Date>;
-
-      const buildFeatures = (planId: string, values: FeatureValues) => {
-        const raw = tPricing.raw(`plans.${planId}.features`) as unknown;
-        const count = Array.isArray(raw) ? raw.length : 0;
-        const disabled = new Set(getPlanDisabledFeatureIndexes(planId));
-
-        return Array.from({ length: count }, (_, i) => ({
-          text: tPricing(`plans.${planId}.features.${i}`, values),
-          ...(disabled.has(i) ? { isNotSupported: true } : {}),
-        }));
-      };
-
-      return PRICING_PLAN_ORDER.map((planId) => {
-        const meta = PRICING_PLANS_METADATA[planId] || PRICING_PLANS_METADATA.free;
-
-        if (planId === "free") {
-          return {
-            id: "free",
-            name: tPricing("plans.free.name"),
-            monthlyPrice: meta.monthlyPrice,
-            yearlyPrice: 0,
-            ctaText: tPricing("plans.free.ctaText"),
-            colorClass: meta.colorClass,
-            features: buildFeatures("free", {
-              credits: 100,
-              images: 20,
-              concurrent: 1,
-            }),
-          };
-        }
-
-        const config = getCreditsConfig(planId);
-
-        return {
-          id: planId,
-          name: tPricing(`plans.${planId}.name`),
-          monthlyPrice: meta.monthlyPrice,
-          yearlyPrice: getYearlyPrice(planId, meta.monthlyPrice),
-          ctaText: tPricing(`plans.${planId}.ctaText`),
-          ...(meta.isPopular ? { isPopular: true } : {}),
-          ...(meta.isSpecialOffer ? { isSpecialOffer: true } : {}),
-          colorClass: meta.colorClass,
-          outerColor: meta.outerColor,
-          productId: getProductId(planId),
-          features: buildFeatures(planId, {
-            credits: config.credits,
-            images: config.max_images_per_month,
-            videos: config.max_videos_per_month,
-            imageConcurrent: config.image_concurrent,
-            videoConcurrent: config.video_concurrent,
-            support: "7×24",
-          }),
-        };
+      const sku = buildSubscriptionPlanType(args.billingCycle, args.planId);
+      const { checkoutUrl } = await createPaymentCheckout({
+        type: "sub",
+        sku,
+        metadata: {
+          userId: user.id,
+          planId: args.planId,
+          billingCycle: args.billingCycle,
+        },
+        customer: { email: user.email },
       });
-    };
 
-    return {
-      monthly: buildSubscriptionPlans("monthly"),
-      yearly: buildSubscriptionPlans("yearly"),
-    };
-  }, [tPricing]);
+      if (checkoutUrl) {
+        window.location.href = checkoutUrl;
+      }
+    },
+    [user],
+  );
 
-  // 从配置构造点数包（一次性购买）
-  const creditPacks = useMemo<CreditPackPlan[]>(() => {
-    return CREDIT_PACKS.map((pack) => {
-      return {
-        id: pack.id,
-        name: pack.name,
-        price: pack.price,
-        credits: pack.credits,
-        validDays: pack.validDays,
-        bonusRate: pack.bonusRate,
-        productId: getCreemPayCreditPackProductId(pack.id),
-        accentColor:
-          CREDIT_PACK_ACCENT_COLORS_BY_NAME[pack.name.toLowerCase()] || undefined,
-      };
-    });
-  }, []);
+  const startCreditPackCheckout = useCallback(
+    async (pack: CreditPackPlan) => {
+      if (!user) return;
 
-  // 支付方式图标：使用 `public/payments/*`（文件名小写、无 pay_ 前缀）
+      const { checkoutUrl } = await createPaymentCheckout({
+        type: "one-time",
+        sku: pack.id,
+        metadata: {
+          userId: user.id,
+          packId: pack.id,
+          source: "pricing",
+        },
+        customer: { email: user.email },
+      });
+
+      if (checkoutUrl) {
+        window.location.href = checkoutUrl;
+      }
+    },
+    [user],
+  );
+
   const paymentIconMethods = useMemo<PaymentIconMethod[]>(
     () => [
       { id: "mastercard", name: "Mastercard", image: "/payments/mastercard.webp" },
@@ -218,7 +144,6 @@ export default function PricingPageClient() {
     [],
   );
 
-  // 注入到扩展组件的通用文案（避免扩展组件直接依赖 next-intl）
   const pricingLabels = useMemo<PricingLabels>(
     () => ({
       billingCycleSaveLabel: tPricing("billingCycle.save"),
@@ -227,7 +152,6 @@ export default function PricingPageClient() {
     [tPricing],
   );
 
-  // PricingCard 文案
   const pricingCardLabels = useMemo<PricingCardLabels>(
     () => ({
       billingCycle: {
@@ -244,7 +168,6 @@ export default function PricingPageClient() {
     [tCard],
   );
 
-  // CreditPacks 文案 + 富文本渲染器（承接 t.rich）
   const creditPacksLabels = useMemo<CreditPacksLabels>(
     () => ({
       title: tPacks("title"),
@@ -267,7 +190,6 @@ export default function PricingPageClient() {
     [tPacks],
   );
 
-  // PaymentIcons 文案
   const paymentIconsLabels = useMemo<PaymentIconsLabels>(
     () => ({
       securePayment: tPayment("securePayment"),
@@ -278,7 +200,6 @@ export default function PricingPageClient() {
     [tPayment],
   );
 
-  // FAQ 条目在页面层组装（扩展组件只负责渲染）
   const faqItems = useMemo(
     () =>
       Array.from({ length: 10 }, (_, i) => ({
@@ -291,7 +212,6 @@ export default function PricingPageClient() {
   return (
     <div className="min-h-screen">
       <div className="py-16 px-4 md:px-6 lg:px-8 ">
-        {/* 标题部分 */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -316,10 +236,11 @@ export default function PricingPageClient() {
           labels={pricingLabels}
           cardLabels={pricingCardLabels}
           creditPacksLabels={creditPacksLabels}
+          onSubscribe={startSubscriptionCheckout}
+          onBuyCreditPack={startCreditPackCheckout}
         />
       </div>
 
-      {/* 支付方式图标 */}
       <div className="py-8">
         <div className="container mx-auto px-4">
           <PaymentIcons
@@ -330,8 +251,8 @@ export default function PricingPageClient() {
         </div>
       </div>
 
-      {/* FAQ 部分 */}
       <FAQ title={tFaq("title")} items={faqItems} />
     </div>
   );
 }
+

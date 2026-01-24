@@ -31,4 +31,3 @@ export function getPaymentRuntimeConfigFromEnv(): PaymentRuntimeConfig {
     creem: getCreemRuntimeConfigFromEnv(),
   };
 }
-

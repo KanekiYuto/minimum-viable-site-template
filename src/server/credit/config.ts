@@ -1,4 +1,4 @@
-import { buildSubscriptionPlanType, type SubscriptionBillingCycle } from "@/shared/payment/config/subscription-key";
+import { buildSubscriptionPlanType, type SubscriptionBillingCycle } from "@/shared/payment/subscription-key";
 
 // 积分配置
 export const creditConfig = {

@@ -44,6 +44,11 @@ interface PricingProps {
   cardLabels: PricingCardLabels;
   /** CreditPacks 使用的文案/富文本渲染器 */
   creditPacksLabels: CreditPacksLabels;
+  onSubscribe?: (args: {
+    planId: string;
+    billingCycle: "monthly" | "yearly";
+  }) => Promise<void> | void;
+  onBuyCreditPack?: (pack: CreditPackPlan) => Promise<void> | void;
 }
 
 /**
@@ -62,6 +67,8 @@ export function Pricing({
   labels,
   cardLabels,
   creditPacksLabels,
+  onSubscribe,
+  onBuyCreditPack,
 }: PricingProps) {
   const [billingCycle, setBillingCycle] = useState<BillingCycle>("monthly");
 
@@ -133,7 +140,12 @@ export function Pricing({
           viewport={{ once: true }}
           className="w-full bg-background-1 p-4 rounded-2xl border border-background-2"
         >
-          <CreditPacks packs={creditPacks} user={user} labels={creditPacksLabels} />
+          <CreditPacks
+            packs={creditPacks}
+            user={user}
+            labels={creditPacksLabels}
+            onBuyPack={onBuyCreditPack}
+          />
         </motion.div>
       ) : (
         <motion.div
@@ -154,6 +166,7 @@ export function Pricing({
                 user={user}
                 freePlanHref={freePlanHref}
                 labels={cardLabels}
+                onSubscribe={onSubscribe}
               />
             ))}
           </div>

@@ -3,8 +3,8 @@ import path from 'node:path';
 import { pathToFileURL } from 'node:url';
 import dotenv from 'dotenv';
 import { createCreem } from 'creem_io';
-import { paymentConfigSource } from '../config/payment-config.source';
-import { parseSubscriptionPlanType } from '../config/subscription-key';
+import { CREDIT_PACKS, SUBSCRIPTIONS } from '../catalog/catalog';
+import { parseSubscriptionPlanType } from '../subscription-key';
 
 /**
  * 使用方式:
@@ -27,7 +27,16 @@ type EnvKey = 'local' | 'prod';
 type BillingCycle = 'monthly' | 'yearly';
 
 const PRODUCTS_PATH = (envKey: EnvKey) =>
-  path.join(process.cwd(), 'src', 'shared', 'payment', 'config', 'products', 'creem', `creem.${envKey}.ts`);
+  path.join(
+    process.cwd(),
+    'src',
+    'server',
+    'payment',
+    'providers',
+    'creem',
+    'products',
+    `creem.${envKey}.ts`,
+  );
 const ENV_FILES_BY_TARGET: Record<EnvKey, string[]> = {
   local: ['.env.local'],
   prod: ['.env'],
@@ -142,10 +151,6 @@ const ensureProduct = async (
   return created.id;
 };
 
-type Mutable<T> = { -readonly [K in keyof T]: Mutable<T[K]> };
-type PaymentConfigSource = typeof paymentConfigSource;
-const updatedSource = JSON.parse(JSON.stringify(paymentConfigSource)) as Mutable<PaymentConfigSource>;
-
 type ProductIds = { current: string; historical: string[] };
 type CreditPackBase = {
   id: string;
@@ -182,13 +187,12 @@ const createCurrentIdsStore = () => ({
   creditPacks: {} as Record<string, string>,
 });
 
-// 创建缺失的产品并写回到源配置
 const syncProducts = async () => {
   const existingProducts = await listAllProducts();
   const existingByName = new Map(existingProducts.map((item) => [item.name, item.id]));
   const currentIds = createCurrentIdsStore();
 
-  const subscriptionEntries = Object.entries(updatedSource.subscriptions);
+  const subscriptionEntries = Object.entries(SUBSCRIPTIONS);
   for (const [planKey, plan] of subscriptionEntries) {
     const billingCycle = resolveBillingCycle(planKey);
     const name = buildSubscriptionName(plan.planType, billingCycle);
@@ -222,7 +226,7 @@ const syncProducts = async () => {
     currentIds.subscriptions[planKey] = productId;
   }
 
-  for (const pack of updatedSource.creditPacks) {
+  for (const pack of CREDIT_PACKS) {
     const name = buildCreditPackName(pack.name, pack.validDays);
     const price = Math.round(pack.price * 100);
 
@@ -254,23 +258,32 @@ const syncProducts = async () => {
   return currentIds;
 };
 
+const buildIds = (existing: ProductIds | undefined, nextCurrent: string): ProductIds => {
+  const previous = existing?.current ? [existing.current] : [];
+  const mergedHistorical = [...(existing?.historical || []), ...previous].filter(Boolean);
+  const uniqueHistorical = Array.from(new Set(mergedHistorical)).filter((id) => id !== nextCurrent);
+  return { current: nextCurrent, historical: uniqueHistorical };
+};
+
 const writeProductsFile = async (
-  source: PaymentConfigSource,
   currentIds: { subscriptions: Record<string, string>; creditPacks: Record<string, string> }
 ) => {
-  const creditPacks = source.creditPacks.map((pack) => {
-    const historical = [...(pack.ids?.historical || [])];
-    const current = currentIds.creditPacks[pack.id] || '';
-    return { ...pack, ids: { current, historical } };
+  const existingCatalog = await loadExistingCatalog();
+
+  const creditPacks: CreemProductCatalog["creditPacks"] = CREDIT_PACKS.map((pack) => {
+    const current = currentIds.creditPacks[pack.id] || "";
+    const existing =
+      existingCatalog?.creditPacks.find((item) => item.id === pack.id)?.ids || undefined;
+    return { ...pack, ids: buildIds(existing, current) };
   });
 
-  const subscriptions = Object.fromEntries(
-    Object.entries(source.subscriptions).map(([key, sub]) => {
-      const historical = [...(sub.ids?.historical || [])];
-      const current = currentIds.subscriptions[key] || '';
-      return [key, { ...sub, ids: { current, historical } }];
-    })
-  ) as CreemProductCatalog['subscriptions'];
+  const subscriptions: CreemProductCatalog["subscriptions"] = Object.fromEntries(
+    Object.entries(SUBSCRIPTIONS).map(([key, sub]) => {
+      const current = currentIds.subscriptions[key] || "";
+      const existing = existingCatalog?.subscriptions?.[key]?.ids || undefined;
+      return [key, { ...sub, ids: buildIds(existing, current) }];
+    }),
+  );
 
   const catalog: CreemProductCatalog = { creditPacks, subscriptions };
 
@@ -282,7 +295,7 @@ const writeProductsFile = async (
 
 syncProducts()
   .then((currentIds) => {
-    return writeProductsFile(updatedSource, currentIds).then(() => {
+    return writeProductsFile(currentIds).then(() => {
       console.log(`[OK] Updated ${PRODUCTS_PATH(env)} with current IDs`);
     });
   })
