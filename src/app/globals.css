@@ -34,6 +34,7 @@
   --background-5: rgb(var(--neutral-50));
 
   --background-generator: rgb(var(--neutral-white));
+  --background-dark: rgb(var(--neutral-80));
 
   --radius: 0.625rem;
   --secondary-background: oklch(0.98 0 0);
@@ -86,6 +87,7 @@
   --background-5: rgb(var(--neutral-50));
 
   --background-generator: rgb(var(--neutral-95));
+  --background-dark: rgb(var(--neutral-90));
 
   --sidebar-bg: #0f0f0f;
   --secondary-background: #151515;
@@ -123,6 +125,7 @@
 
 @theme inline {
   --color-background-generator: var(--background-generator);
+  --color-background-dark: var(--background-dark);
 
   --color-background: var(--background);
   --color-secondary-background: var(--secondary-background);

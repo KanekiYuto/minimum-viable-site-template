@@ -11,6 +11,7 @@ import { CreditsHeader } from "./_components/CreditsHeader";
 import { CreditsOverview } from "./_components/CreditsOverview";
 import { CreditsFilter } from "./_components/CreditsFilter";
 import { CreditsList } from "./_components/CreditsList";
+import { SignedOutGuide } from "@/components/auth/SignedOutGuide";
 
 export default function CreditsPage() {
   const t = useTranslations("settings.credits");
@@ -36,11 +37,7 @@ export default function CreditsPage() {
   }
 
   if (!user) {
-    return (
-      <div className="flex items-center justify-center min-h-[60vh]">
-        <div className="text-muted">Not signed in</div>
-      </div>
-    );
+    return <SignedOutGuide />;
   }
 
   return (

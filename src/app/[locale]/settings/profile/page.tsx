@@ -7,6 +7,7 @@ import { UserProfile } from "./_components/UserProfile";
 import { ProfileSkeleton } from "./_components/ProfileSkeleton";
 import { useSettingsNav } from "../_components/SettingsNavContext";
 import { useUserStore } from "@/store/useUserStore";
+import { SignedOutGuide } from "@/components/auth/SignedOutGuide";
 
 export default function ProfilePage() {
   const t = useTranslations("settings.profile");
@@ -47,11 +48,7 @@ export default function ProfilePage() {
   }
 
   if (!user) {
-    return (
-      <div className="flex items-center justify-center min-h-[60vh]">
-        <div className="text-muted">{t("notSignedIn")}</div>
-      </div>
-    );
+    return <SignedOutGuide showPricingLink={false} />;
   }
 
   return (

@@ -7,6 +7,7 @@ import { BillingInfo } from "../_components/BillingInfo";
 import { ProfileSkeleton } from "../profile/_components/ProfileSkeleton";
 import { useSettingsNav } from "../_components/SettingsNavContext";
 import { useUserStore } from "@/store/useUserStore";
+import { SignedOutGuide } from "@/components/auth/SignedOutGuide";
 
 export default function BillingPage() {
   const t = useTranslations("settings.billing");
@@ -47,11 +48,7 @@ export default function BillingPage() {
   }
 
   if (!user) {
-    return (
-      <div className="flex items-center justify-center min-h-[60vh]">
-        <div className="text-muted">Not signed in</div>
-      </div>
-    );
+    return <SignedOutGuide />;
   }
 
   return (

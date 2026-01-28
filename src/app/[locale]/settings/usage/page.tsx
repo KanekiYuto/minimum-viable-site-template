@@ -25,6 +25,7 @@ import {
 } from "@/components/ui/table";
 import { Empty, EmptyHeader, EmptyMedia, EmptyTitle } from "@/components/ui/empty";
 import { Badge } from "@/components/ui/badge";
+import { SignedOutGuide } from "@/components/auth/SignedOutGuide";
 
 interface UsageRecord {
   id: string;
@@ -109,11 +110,7 @@ export default function UsagePage() {
   };
 
   if (!user) {
-    return (
-      <div className="flex items-center justify-center min-h-[60vh]">
-        <div className="text-muted">未登录</div>
-      </div>
-    );
+    return <SignedOutGuide />;
   }
 
   if (isLoading) {

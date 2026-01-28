@@ -4,6 +4,8 @@ import { Check, X, HelpCircle } from "lucide-react";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import type { PricingFeature, SubscriptionPricingPlan } from "./types";
+import { Button } from "@/components/ui/button";
+import { Spinner } from "@/components/ui/spinner";
 
 export type PricingCardLabels = {
   billingCycle: Record<"monthly" | "yearly", string>;
@@ -149,70 +151,59 @@ function CTAButton({
   labels: PricingCardLabels;
 }) {
   const router = useRouter();
-  const baseClassName =
-    "w-full py-3 px-6 rounded-lg font-semibold mb-8 transition-all duration-200";
+
+  const baseProps = {
+    variant: "payment" as const,
+    size: "xl" as const,
+    className: "mb-8",
+  };
 
   if (plan.id === "free") {
     return (
-      <button
-        onClick={() => !isCurrent && router.push(freePlanHref)}
-        disabled={isCurrent}
-        className={`${baseClassName} text-xs md:text-sm lg:text-base ${
-          isCurrent
-            ? "bg-white/20 text-white cursor-not-allowed"
-            : "bg-white text-black hover:bg-white/90 cursor-pointer"
-        }`}
+      <Button
+        {...baseProps}
+        onClick={() => {
+          if (!isCurrent) router.push(freePlanHref);
+        }}
       >
         {isCurrent ? labels.currentPlan : plan.ctaText}
-      </button>
+      </Button>
     );
   }
 
   if (!user) {
     return (
-      <button
-        disabled
-        className={`${baseClassName} text-xs md:text-sm lg:text-base bg-white/20 text-white cursor-not-allowed`}
-      >
+      <Button {...baseProps} disabled>
         {labels.loginRequired}
-      </button>
+      </Button>
     );
   }
 
   if (isCurrent) {
     return (
-      <button
-        disabled
-        className={`${baseClassName} bg-white/20 text-white cursor-not-allowed`}
-      >
+      <Button {...baseProps} disabled>
         {labels.currentPlan}
-      </button>
+      </Button>
     );
   }
 
   if (!onPaymentClick) {
     return (
-      <button
-        disabled
-        className={`${baseClassName} bg-white/20 text-white cursor-not-allowed`}
-      >
+      <Button {...baseProps} disabled>
         {labels.configuring}
-      </button>
+      </Button>
     );
   }
 
   return (
-    <button
-      onClick={onPaymentClick}
+    <Button
+      {...baseProps}
       disabled={isLoading}
-      className={`${baseClassName} ${
-        isLoading
-          ? "bg-white/20 text-white cursor-not-allowed opacity-70"
-          : "bg-white text-black hover:bg-white/90 cursor-pointer"
-      }`}
+      onClick={onPaymentClick}
     >
+      {isLoading ? <Spinner /> : null}
       {isLoading ? labels.processing : plan.ctaText}
-    </button>
+    </Button>
   );
 }
 
@@ -229,9 +220,8 @@ function FeatureItem({ feature }: { feature: PricingFeature }) {
       )}
       <div className="flex-1 flex items-center justify-between gap-2">
         <span
-          className={`text-xs md:text-sm lg:text-base leading-relaxed ${
-            feature.isNotSupported ? "text-white/40" : "text-white"
-          }`}
+          className={`text-xs md:text-sm lg:text-base leading-relaxed ${feature.isNotSupported ? "text-white/40" : "text-white"
+            }`}
         >
           {parseFeatureText(feature.text)}
         </span>

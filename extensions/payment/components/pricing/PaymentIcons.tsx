@@ -66,7 +66,7 @@ export function PaymentIcons({ methods, supportEmail, labels }: PaymentIconsProp
           {methods.map((method) => (
             <Tooltip key={method.id}>
               <TooltipTrigger asChild>
-                <div className="w-24 h-[72px] rounded-lg overflow-hidden border border-border cursor-pointer hover:border-border/80 transition-colors">
+                <div className="w-24 h-[72px] rounded-lg overflow-hidden border border-bg-background-1 bg-background-dark cursor-pointer hover:border-bg-background-2 transition-colors">
                   <Image
                   src={method.image}
                   alt={method.name}
